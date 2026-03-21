@@ -4,6 +4,10 @@ A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). 
 
 ![Game Preview](https://img.shields.io/badge/built%20with-Excalibur.js-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Vite](https://img.shields.io/badge/Vite-8.0-646cff)
 
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/f1cdec67-71c3-479a-8e6e-82180fd01c51" autoplay loop muted playsinline width="800"></video>
+</div>
+
 ---
 
 ## Gameplay

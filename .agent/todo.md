@@ -27,3 +27,4 @@
 
 ## Bugs/Improvements
 - Cannot use Space Enter to jump
+- Thoroughly check for bugs

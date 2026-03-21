@@ -83,12 +83,11 @@ export class GameScene extends Scene {
       this.spawner.reset();
     }
 
-    // Reset player position
+    // Reset player position and state
     if (this.initialized && this.player) {
       this.player.pos.x = CONFIG.playerX;
       this.player.pos.y = CONFIG.groundY - CONFIG.playerHeight / 2;
-      this.player.vel.x = 0;
-      this.player.vel.y = 0;
+      this.player.reset();
     }
 
     if (this.initialized && this.scoreLabel) {

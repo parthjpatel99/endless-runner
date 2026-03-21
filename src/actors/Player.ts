@@ -3,7 +3,7 @@ import { CONFIG } from '../config';
 import { soundManager } from '../audio/SoundManager';
 
 export class Player extends Actor {
-  private isOnGround = false;
+  private isOnGround = true;
   private jumpCount = 0;
   private readonly maxJumps = 1; // single jump
 
@@ -61,6 +61,13 @@ export class Player extends Actor {
       this.pos.y = CONFIG.playerHeight / 2;
       this.vel.y = 0;
     }
+  }
+
+  reset() {
+    this.isOnGround = true;
+    this.jumpCount = 0;
+    this.vel.x = 0;
+    this.vel.y = 0;
   }
 
   get onGround() {

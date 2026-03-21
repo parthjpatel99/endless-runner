@@ -24,3 +24,6 @@
 
 ## Done
 - [x] Write DONE to .agent/status.md
+
+## Bugs/Improvements
+- Cannot use Space Enter to jump

@@ -1,5 +1,6 @@
 import { Actor, CollisionType, Color, Keys, Engine } from 'excalibur';
 import { CONFIG } from '../config';
+import { soundManager } from '../audio/SoundManager';
 
 export class Player extends Actor {
   private isOnGround = false;
@@ -44,6 +45,7 @@ export class Player extends Actor {
       this.vel.y = CONFIG.jumpForce;
       this.isOnGround = false;
       this.jumpCount++;
+      soundManager.playJump();
     }
 
     // Clamp to ground (safety net)

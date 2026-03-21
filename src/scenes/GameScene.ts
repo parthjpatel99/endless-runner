@@ -4,6 +4,8 @@ import { CONFIG } from '../config';
 import { Player } from '../actors/Player';
 import { Ground } from '../actors/Ground';
 import { ObstacleSpawner } from '../systems/ObstacleSpawner';
+import { ParallaxLayer } from '../actors/ParallaxBackground';
+import { soundManager } from '../audio/SoundManager';
 
 export class GameScene extends Scene {
   private player!: Player;
@@ -15,11 +17,32 @@ export class GameScene extends Scene {
   private scoreLabel!: Label;
   private isGameOver = false;
   private initialized = false;
+  private parallaxLayers: ParallaxLayer[] = [];
+  private shakeTimer = 0;
+  private lastScoreMilestone = 0;
 
   onInitialize(engine: Engine) {
+    this.setupParallax();
     this.setupActors();
     this.setupUI(engine);
     this.initialized = true;
+  }
+
+  private setupParallax() {
+    this.parallaxLayers = [];
+    CONFIG.parallaxLayers.forEach((layerConfig, index) => {
+      const layer = new ParallaxLayer(
+        this,
+        layerConfig.speedMultiplier,
+        layerConfig.color,
+        layerConfig.count,
+        layerConfig.yBase,
+        layerConfig.minHeight,
+        layerConfig.maxHeight,
+        -10 + index // z-index: further layers behind
+      );
+      this.parallaxLayers.push(layer);
+    });
   }
 
   private setupActors() {
@@ -42,6 +65,7 @@ export class GameScene extends Scene {
         family: 'monospace',
         textAlign: TextAlign.Left,
       }),
+      z: 10,
     });
     this.add(this.scoreLabel);
   }
@@ -52,6 +76,8 @@ export class GameScene extends Scene {
     this.currentSpeed = CONFIG.initialSpeed;
     this.speedTimer = 0;
     this.isGameOver = false;
+    this.shakeTimer = 0;
+    this.lastScoreMilestone = 0;
 
     if (this.initialized && this.spawner) {
       this.spawner.reset();
@@ -68,14 +94,52 @@ export class GameScene extends Scene {
     if (this.initialized && this.scoreLabel) {
       this.scoreLabel.text = 'Score: 0';
     }
+
+    // Reset parallax layers
+    if (this.initialized) {
+      for (const layer of this.parallaxLayers) {
+        layer.reset();
+      }
+    }
+
+    // Reset camera
+    if (this.camera) {
+      this.camera.pos.x = CONFIG.width / 2;
+      this.camera.pos.y = CONFIG.height / 2;
+    }
   }
 
   onPreUpdate(engine: Engine, delta: number) {
+    // Handle screen shake regardless of game over state
+    if (this.shakeTimer > 0) {
+      this.shakeTimer -= delta;
+      const progress = Math.max(0, this.shakeTimer / CONFIG.shakeDuration);
+      const intensity = CONFIG.shakeIntensity * progress;
+      this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
+      this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
+    } else if (!this.isGameOver) {
+      this.camera.pos.x = CONFIG.width / 2;
+      this.camera.pos.y = CONFIG.height / 2;
+    }
+
     if (this.isGameOver) return;
+
+    // Update parallax layers
+    for (const layer of this.parallaxLayers) {
+      layer.update(this.currentSpeed, delta);
+    }
 
     // Update score
     this.score += (CONFIG.scorePerSecond * delta) / 1000;
-    this.scoreLabel.text = `Score: ${Math.floor(this.score)}`;
+    const currentFloorScore = Math.floor(this.score);
+    this.scoreLabel.text = `Score: ${currentFloorScore}`;
+
+    // Play score milestone sound every 100 points
+    const milestone = Math.floor(currentFloorScore / 100);
+    if (milestone > this.lastScoreMilestone) {
+      this.lastScoreMilestone = milestone;
+      soundManager.playScore();
+    }
 
     // Update speed
     this.speedTimer += delta / 1000;
@@ -99,11 +163,20 @@ export class GameScene extends Scene {
     }
   }
 
+  private startScreenShake() {
+    this.shakeTimer = CONFIG.shakeDuration;
+  }
+
   private triggerGameOver(engine: Engine) {
     this.isGameOver = true;
+    soundManager.playGameOver();
+    this.startScreenShake();
     // Store score for game over screen
     (engine as any).lastScore = Math.floor(this.score);
-    engine.goToScene('gameover');
+    // Delay scene transition slightly so shake is visible
+    setTimeout(() => {
+      engine.goToScene('gameover');
+    }, CONFIG.shakeDuration);
   }
 
   getCurrentScore() {

@@ -13,7 +13,7 @@ window.addEventListener('keydown', (e) => {
 const game = new Engine({
   width: CONFIG.width,
   height: CONFIG.height,
-  displayMode: DisplayMode.FitScreen,
+  displayMode: DisplayMode.FitScreenAndFill,
   backgroundColor: Color.fromHex(CONFIG.backgroundColor),
   antialiasing: false,
   suppressPlayButton: true,

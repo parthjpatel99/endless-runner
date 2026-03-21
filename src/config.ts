@@ -1,44 +1,55 @@
-// ============================================================
-// Game Configuration — all tunable values live here
-// ============================================================
+export const CONFIG = {
+  // Game
+  width: 800,
+  height: 400,
+  backgroundColor: '#1a1a2e',
 
-// --------------- Game Dimensions ---------------
-export const GAME_WIDTH = 800;
-export const GAME_HEIGHT = 400;
+  // Player
+  playerX: 100,
+  playerWidth: 40,
+  playerHeight: 60,
+  playerColor: '#e94560',
+  jumpForce: -700,
+  gravity: 1800,
+  groundY: 340,  // Y position of ground surface (feet of player)
 
-// --------------- Player Settings ---------------
-export const PLAYER_X = 100;           // fixed horizontal position
-export const PLAYER_WIDTH = 40;
-export const PLAYER_HEIGHT = 60;
-export const PLAYER_JUMP_FORCE = -600; // negative = upward velocity
-export const PLAYER_GRAVITY = 1800;    // pixels per second squared
+  // Obstacles
+  obstacleWidth: 30,
+  obstacleMinHeight: 40,
+  obstacleMaxHeight: 120,
+  obstacleColor: '#f5a623',
+  minObstacleGap: 300,
+  maxObstacleGap: 600,
 
-// --------------- Obstacle Settings ---------------
-export const OBSTACLE_MIN_GAP = 250;       // min horizontal gap between obstacles (px)
-export const OBSTACLE_MAX_GAP = 500;       // max horizontal gap between obstacles (px)
-export const OBSTACLE_MIN_HEIGHT = 30;     // min obstacle height (px)
-export const OBSTACLE_MAX_HEIGHT = 90;     // max obstacle height (px)
-export const OBSTACLE_WIDTH = 30;
-export const OBSTACLE_SPAWN_INTERVAL = 1.5; // seconds between spawn checks
+  // Speed
+  initialSpeed: 300,   // pixels per second
+  maxSpeed: 800,
+  speedIncrement: 20,  // added per second
+  speedInterval: 3,    // seconds between speed increases
 
-// --------------- Speed Settings ---------------
-export const INITIAL_SPEED = 300;      // pixels per second
-export const MAX_SPEED = 800;          // pixels per second
-export const ACCELERATION_RATE = 10;   // pixels per second, per second
+  // Score
+  scorePerSecond: 10,
 
-// --------------- Score Settings ---------------
-export const SCORE_MULTIPLIER = 0.01;  // score per pixel traveled
+  // Ground
+  groundHeight: 20,
+  groundColor: '#16213e',
+  groundLineColor: '#0f3460',
 
-// --------------- Visual Settings ---------------
-export const COLOR_BACKGROUND = '#1a1a2e';
-export const COLOR_GROUND = '#4a4e69';
-export const COLOR_PLAYER = '#e94560';
-export const COLOR_OBSTACLE = '#f5a623';
-export const COLOR_SCORE_TEXT = '#ffffff';
+  // Parallax layers (background to foreground)
+  parallaxLayers: [
+    { color: '#16213e', speedMultiplier: 0.1, count: 6, width: 2, minHeight: 20, maxHeight: 60, yBase: 200 },
+    { color: '#0f3460', speedMultiplier: 0.3, count: 4, width: 3, minHeight: 40, maxHeight: 100, yBase: 250 },
+    { color: '#533483', speedMultiplier: 0.6, count: 3, width: 4, minHeight: 60, maxHeight: 140, yBase: 300 },
+  ],
 
-// Parallax layer scroll speed multipliers (relative to game speed)
-export const PARALLAX_LAYER_SPEEDS = [0.1, 0.3, 0.6]; // far → near
+  // Screen shake
+  shakeDuration: 300,
+  shakeIntensity: 8,
 
-// --------------- Audio Settings ---------------
-export const VOLUME_MUSIC = 0.4;
-export const VOLUME_SFX = 0.7;
+  // Fonts and UI
+  scoreFont: '24px monospace',
+  titleFont: 'bold 48px monospace',
+  subtitleFont: '20px monospace',
+  uiColor: '#ffffff',
+  gameOverColor: '#e94560',
+};

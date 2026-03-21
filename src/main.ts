@@ -1,24 +1,22 @@
-import { Engine, Scene, Color, DisplayMode } from 'excalibur';
-import { GAME_WIDTH, GAME_HEIGHT, COLOR_BACKGROUND } from './config.ts';
+import { Engine, DisplayMode, Color, vec } from 'excalibur';
+import { CONFIG } from './config';
+import { GameScene } from './scenes/GameScene';
+import { GameOverScene } from './scenes/GameOverScene';
 
-// --------------- Placeholder scene ---------------
-class GameScene extends Scene {
-  override onInitialize(_engine: Engine): void {
-    // TODO: add player, obstacles, and score label in future tasks
-    console.log('GameScene initialized — ready to build!');
-  }
-}
-
-// --------------- Engine setup ---------------
 const game = new Engine({
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  width: CONFIG.width,
+  height: CONFIG.height,
   displayMode: DisplayMode.FitScreen,
-  backgroundColor: Color.fromHex(COLOR_BACKGROUND),
-  scenes: { game: GameScene },
+  backgroundColor: Color.fromHex(CONFIG.backgroundColor),
+  antialiasing: false,
+  physics: {
+    gravity: vec(0, CONFIG.gravity),
+  },
 });
 
-// Start the game
-game.start('game').catch((err: unknown) => {
-  console.error('Failed to start game:', err);
+game.add('game', new GameScene());
+game.add('gameover', new GameOverScene());
+
+game.start().then(() => {
+  game.goToScene('game');
 });

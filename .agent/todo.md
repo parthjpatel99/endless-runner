@@ -28,4 +28,4 @@
 ## Bugs/Improvements
 - [x] Cannot use Space/Enter to jump (fixed in prior commit)
 - [x] Thoroughly check for bugs (reviewed all files)
-- [x] Can only jump once at game start (fixed: inputCooldown absorbs restart keypress)
+- [x] Fixed: can only jump once at game start — position-based ground detection (>= instead of >) before jump check; increased inputCooldown to 5 frames

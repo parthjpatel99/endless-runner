@@ -5,7 +5,6 @@ import { soundManager } from '../audio/SoundManager';
 export class Player extends Actor {
   private isOnGround = true;
   private jumpCount = 0;
-  private readonly maxJumps = 1; // single jump
   private inputCooldown = 0; // frames to ignore input after reset
 
   constructor() {
@@ -42,25 +41,27 @@ export class Player extends Actor {
       return;
     }
 
+    const groundLevel = CONFIG.groundY - CONFIG.playerHeight / 2;
+
+    // Position-based ground detection (reliable; collision events can miss after teleport)
+    if (this.pos.y >= groundLevel) {
+      this.pos.y = groundLevel;
+      this.vel.y = 0;
+      this.isOnGround = true;
+      this.jumpCount = 0;
+    }
+
     // Jump on space or up arrow
     if (
       (engine.input.keyboard.wasPressed(Keys.Space) ||
         engine.input.keyboard.wasPressed(Keys.Up) ||
         engine.input.keyboard.wasPressed(Keys.ArrowUp)) &&
-      (this.isOnGround || this.jumpCount < this.maxJumps)
+      this.isOnGround
     ) {
       this.vel.y = CONFIG.jumpForce;
       this.isOnGround = false;
       this.jumpCount++;
       soundManager.playJump();
-    }
-
-    // Clamp to ground (safety net)
-    if (this.pos.y > CONFIG.groundY - CONFIG.playerHeight / 2) {
-      this.pos.y = CONFIG.groundY - CONFIG.playerHeight / 2;
-      this.vel.y = 0;
-      this.isOnGround = true;
-      this.jumpCount = 0;
     }
 
     // Clamp to ceiling
@@ -75,7 +76,7 @@ export class Player extends Actor {
     this.jumpCount = 0;
     this.vel.x = 0;
     this.vel.y = 0;
-    this.inputCooldown = 2; // skip 2 frames to absorb the restart keypress
+    this.inputCooldown = 5; // skip 5 frames to absorb the restart keypress
   }
 
   get onGround() {

@@ -26,5 +26,6 @@
 - [x] Write DONE to .agent/status.md
 
 ## Bugs/Improvements
-- Cannot use Space Enter to jump
-- Thoroughly check for bugs
+- [x] Cannot use Space/Enter to jump (fixed in prior commit)
+- [x] Thoroughly check for bugs (reviewed all files)
+- [x] Can only jump once at game start (fixed: inputCooldown absorbs restart keypress)

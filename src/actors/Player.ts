@@ -6,6 +6,7 @@ export class Player extends Actor {
   private isOnGround = true;
   private jumpCount = 0;
   private readonly maxJumps = 1; // single jump
+  private inputCooldown = 0; // frames to ignore input after reset
 
   constructor() {
     super({
@@ -35,6 +36,12 @@ export class Player extends Actor {
   }
 
   onPreUpdate(engine: Engine, _delta: number) {
+    // Drain input cooldown (prevents auto-jump on scene restart via Space)
+    if (this.inputCooldown > 0) {
+      this.inputCooldown--;
+      return;
+    }
+
     // Jump on space or up arrow
     if (
       (engine.input.keyboard.wasPressed(Keys.Space) ||
@@ -68,6 +75,7 @@ export class Player extends Actor {
     this.jumpCount = 0;
     this.vel.x = 0;
     this.vel.y = 0;
+    this.inputCooldown = 2; // skip 2 frames to absorb the restart keypress
   }
 
   get onGround() {

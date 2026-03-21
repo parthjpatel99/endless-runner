@@ -2,25 +2,25 @@
 
 ## Core Gameplay (70%)
 - [x] Project initialization (Vite + TypeScript + Excalibur.js)
-- [ ] Config file with all tunable values
-- [ ] Auto-running player with jump mechanic
-- [ ] Procedural obstacle spawning system
-- [ ] Collision detection and game-over state
-- [ ] Score tracking (distance-based)
-- [ ] Increasing speed over time
-- [ ] Game-over and restart screen
+- [x] Config file with all tunable values
+- [x] Auto-running player with jump mechanic
+- [x] Procedural obstacle spawning system
+- [x] Collision detection and game-over state
+- [x] Score tracking (distance-based)
+- [x] Increasing speed over time
+- [x] Game-over and restart screen
 
 ## Polish (20%)
-- [ ] Parallax scrolling background (multi-layer)
-- [ ] Screen shake on collision
-- [ ] Ground/platform visuals
-- [ ] Player run/jump animations (sprite or procedural)
-- [ ] Audio (jump sound, game over, background music)
-- [ ] Particle effects (dust on jump/land)
+- [x] Parallax scrolling background (multi-layer)
+- [x] Screen shake on collision
+- [x] Ground/platform visuals
+- [x] Player run/jump animations (sprite or procedural)
+- [x] Audio (jump sound, game over, background music)
+- [x] Particle effects (dust on jump/land)
 
 ## Tests (10%)
-- [ ] Obstacle spawning logic tests
-- [ ] Collision detection tests
+- [x] Obstacle spawning logic tests
+- [x] Collision detection tests
 
 ## Done
-- [ ] Write DONE to .agent/status.md
+- [x] Write DONE to .agent/status.md

@@ -1,0 +1,35 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm test 2>&1 | tail -30"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npm test 2>&1 | tail -30"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"$CLAUDE_TOOL_INPUT\" | grep -q '\"file_path\".*src/config\\.ts' && echo 'NOTE: Editing src/config.ts (game balance constants). Changes affect gameplay feel — confirm this is intentional.' || true"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'" />
     <title>NEON RUNNER</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,6 +32,7 @@
         background-size: 48px 48px;
         pointer-events: none;
         z-index: 0;
+        will-change: transform;
       }
 
       /* Ambient radial glow */
@@ -41,6 +43,7 @@
         background: radial-gradient(ellipse 70% 55% at 50% 50%, rgba(0, 245, 212, 0.05) 0%, transparent 70%);
         pointer-events: none;
         z-index: 0;
+        will-change: transform;
       }
 
       #app {
@@ -60,6 +63,7 @@
         background-size: 48px 48px;
         pointer-events: none;
         z-index: 198;
+        will-change: transform;
       }
 
       /* CRT Scanlines */
@@ -75,6 +79,7 @@
         );
         pointer-events: none;
         z-index: 200;
+        will-change: transform;
       }
 
       /* CRT vignette */
@@ -84,6 +89,7 @@
         background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.72) 100%);
         pointer-events: none;
         z-index: 199;
+        will-change: transform;
       }
 
       /* Corner accents */

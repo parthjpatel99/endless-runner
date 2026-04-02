@@ -1,6 +1,7 @@
 import { Actor, CollisionType, Color, Keys, Engine } from 'excalibur';
 import { CONFIG } from '../config';
 import { soundManager } from '../audio/SoundManager';
+import { Ground } from './Ground';
 
 export class Player extends Actor {
   private isOnGround = true;
@@ -19,16 +20,15 @@ export class Player extends Actor {
   }
 
   onInitialize(_engine: Engine) {
-    // Listen for collision with ground
     this.on('collisionstart', (evt) => {
-      if (evt.other.constructor.name === 'Ground') {
+      if (evt.other instanceof Ground) {
         this.isOnGround = true;
         this.jumpCount = 0;
       }
     });
 
     this.on('collisionend', (evt) => {
-      if (evt.other.constructor.name === 'Ground') {
+      if (evt.other instanceof Ground) {
         this.isOnGround = false;
       }
     });

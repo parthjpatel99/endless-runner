@@ -147,13 +147,16 @@ export class GameScene extends Scene {
     // Handle screen shake regardless of game over state
     if (this.shakeTimer > 0) {
       this.shakeTimer -= delta;
-      const progress = Math.max(0, this.shakeTimer / CONFIG.shakeDuration);
-      const intensity = CONFIG.shakeIntensity * progress;
-      this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
-      this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
-    } else if (!this.isGameOver) {
-      this.camera.pos.x = CONFIG.width / 2;
-      this.camera.pos.y = CONFIG.height / 2;
+      if (this.shakeTimer <= 0) {
+        // Shake just ended — snap camera back
+        this.camera.pos.x = CONFIG.width / 2;
+        this.camera.pos.y = CONFIG.height / 2;
+      } else {
+        const progress = this.shakeTimer / CONFIG.shakeDuration;
+        const intensity = CONFIG.shakeIntensity * progress;
+        this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
+        this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
+      }
     }
 
     if (this.isGameOver) return;

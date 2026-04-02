@@ -1,4 +1,4 @@
-import { Scene, Engine, Color, vec, Font, Label, TextAlign } from 'excalibur';
+import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
 import { CONFIG } from '../config';
 import { Player } from '../actors/Player';
@@ -15,6 +15,7 @@ export class GameScene extends Scene {
   private currentSpeed = CONFIG.initialSpeed;
   private speedTimer = 0;
   private scoreLabel!: Label;
+  private bestScoreLabel!: Label;
   private isGameOver = false;
   private initialized = false;
   private parallaxLayers: ParallaxLayer[] = [];
@@ -49,6 +50,18 @@ export class GameScene extends Scene {
     this.ground = new Ground();
     this.add(this.ground);
 
+    // Neon glow line at ground surface
+    const groundLine = new Actor({
+      x: CONFIG.width / 2,
+      y: CONFIG.groundY,
+      width: CONFIG.width * 3,
+      height: 2,
+      color: Color.fromHex(CONFIG.groundLineColor),
+      collisionType: CollisionType.PreventCollision,
+      z: 2,
+    });
+    this.add(groundLine);
+
     this.player = new Player();
     this.add(this.player);
 
@@ -57,17 +70,32 @@ export class GameScene extends Scene {
 
   private setupUI(_engine: Engine) {
     this.scoreLabel = new Label({
-      text: 'Score: 0',
-      pos: vec(20, 20),
+      text: '0',
+      pos: vec(CONFIG.width / 2, 28),
       font: new Font({
-        size: 24,
-        color: Color.White,
-        family: 'monospace',
-        textAlign: TextAlign.Left,
+        size: 26,
+        bold: true,
+        color: Color.fromHex(CONFIG.uiColor),
+        family: '"Orbitron", monospace',
+        textAlign: TextAlign.Center,
       }),
       z: 10,
     });
     this.add(this.scoreLabel);
+
+    const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0');
+    this.bestScoreLabel = new Label({
+      text: `BEST  ${bestScore}`,
+      pos: vec(CONFIG.width - 16, 28),
+      font: new Font({
+        size: 14,
+        color: Color.fromHex('#2a8a7e'),
+        family: '"Orbitron", monospace',
+        textAlign: TextAlign.Right,
+      }),
+      z: 10,
+    });
+    this.add(this.bestScoreLabel);
   }
 
   onActivate(_ctx: SceneActivationContext) {
@@ -91,7 +119,12 @@ export class GameScene extends Scene {
     }
 
     if (this.initialized && this.scoreLabel) {
-      this.scoreLabel.text = 'Score: 0';
+      this.scoreLabel.text = '0';
+    }
+
+    if (this.initialized && this.bestScoreLabel) {
+      const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0');
+      this.bestScoreLabel.text = `BEST  ${bestScore}`;
     }
 
     // Reset parallax layers
@@ -131,7 +164,7 @@ export class GameScene extends Scene {
     // Update score
     this.score += (CONFIG.scorePerSecond * delta) / 1000;
     const currentFloorScore = Math.floor(this.score);
-    this.scoreLabel.text = `Score: ${currentFloorScore}`;
+    this.scoreLabel.text = `${currentFloorScore}`;
 
     // Play score milestone sound every 100 points
     const milestone = Math.floor(currentFloorScore / 100);

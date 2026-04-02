@@ -4,13 +4,161 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>vite_temp</title>
+    <title>NEON RUNNER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; background: #1a1a2e; }
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #04040f;
+      }
+
       canvas { display: block; }
+
+      /* Perspective grid background */
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 245, 212, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 245, 212, 0.035) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Ambient radial glow */
+      body::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse 70% 55% at 50% 50%, rgba(0, 245, 212, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      #app {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Subtle grid overlay on top of canvas */
+      #grid-overlay {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 245, 212, 0.022) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 245, 212, 0.022) 1px, transparent 1px);
+        background-size: 48px 48px;
+        pointer-events: none;
+        z-index: 198;
+      }
+
+      /* CRT Scanlines */
+      #scanlines {
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 3px,
+          rgba(0, 0, 0, 0.06) 3px,
+          rgba(0, 0, 0, 0.06) 4px
+        );
+        pointer-events: none;
+        z-index: 200;
+      }
+
+      /* CRT vignette */
+      #vignette {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.72) 100%);
+        pointer-events: none;
+        z-index: 199;
+      }
+
+      /* Corner accents */
+      #corner-tl, #corner-tr, #corner-bl, #corner-br {
+        position: fixed;
+        width: 28px;
+        height: 28px;
+        pointer-events: none;
+        z-index: 201;
+      }
+      #corner-tl {
+        top: 12px; left: 12px;
+        border-top: 2px solid rgba(0, 245, 212, 0.5);
+        border-left: 2px solid rgba(0, 245, 212, 0.5);
+      }
+      #corner-tr {
+        top: 12px; right: 12px;
+        border-top: 2px solid rgba(0, 245, 212, 0.5);
+        border-right: 2px solid rgba(0, 245, 212, 0.5);
+      }
+      #corner-bl {
+        bottom: 12px; left: 12px;
+        border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+        border-left: 2px solid rgba(0, 245, 212, 0.5);
+      }
+      #corner-br {
+        bottom: 12px; right: 12px;
+        border-bottom: 2px solid rgba(0, 245, 212, 0.5);
+        border-right: 2px solid rgba(0, 245, 212, 0.5);
+      }
+
+      /* Bottom hint bar */
+      #hint-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 100%);
+        pointer-events: none;
+        z-index: 202;
+        font-family: 'Orbitron', monospace;
+        font-size: 8px;
+        letter-spacing: 0.2em;
+        color: rgba(0, 245, 212, 0.35);
+        text-transform: uppercase;
+      }
+
+      #hint-bar kbd {
+        font-family: 'Orbitron', monospace;
+        font-size: 7px;
+        color: rgba(0, 245, 212, 0.6);
+        border: 1px solid rgba(0, 245, 212, 0.35);
+        border-radius: 3px;
+        padding: 1px 5px;
+        letter-spacing: 0.1em;
+        background: rgba(0, 245, 212, 0.05);
+      }
     </style>
   </head>
   <body>
+    <div id="grid-overlay"></div>
+    <div id="vignette"></div>
+    <div id="scanlines"></div>
+    <div id="corner-tl"></div>
+    <div id="corner-tr"></div>
+    <div id="corner-bl"></div>
+    <div id="corner-br"></div>
+    <div id="hint-bar">
+      <kbd>SPACE</kbd> jump &nbsp;·&nbsp; avoid obstacles &nbsp;·&nbsp; survive
+    </div>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

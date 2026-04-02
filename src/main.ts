@@ -10,6 +10,9 @@ window.addEventListener('keydown', (e) => {
   }
 }, { passive: false });
 
+// Pre-load Orbitron so canvas text uses it from first frame
+document.fonts.load('700 24px "Orbitron"').catch(() => {});
+
 const game = new Engine({
   width: CONFIG.width,
   height: CONFIG.height,

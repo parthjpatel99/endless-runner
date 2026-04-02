@@ -23,18 +23,15 @@ export class ObstacleSpawner {
         Math.random() * (CONFIG.maxObstacleGap - CONFIG.minObstacleGap);
     }
 
-    // Move obstacles and remove off-screen ones
-    for (const obs of this.obstacles) {
+    // Move obstacles and remove off-screen ones (reverse iterate for safe in-place removal)
+    for (let i = this.obstacles.length - 1; i >= 0; i--) {
+      const obs = this.obstacles[i];
       obs.vel.x = -currentSpeed;
-    }
-
-    this.obstacles = this.obstacles.filter((obs) => {
       if (obs.pos.x < -100) {
         obs.kill();
-        return false;
+        this.obstacles.splice(i, 1);
       }
-      return true;
-    });
+    }
   }
 
   private spawnObstacle(currentSpeed: number) {

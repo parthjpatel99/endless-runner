@@ -21,6 +21,7 @@ export class GameScene extends Scene {
   private parallaxLayers: ParallaxLayer[] = [];
   private shakeTimer = 0;
   private lastScoreMilestone = 0;
+  private displayedScore = -1;
 
   onInitialize(engine: Engine) {
     this.setupParallax();
@@ -106,6 +107,7 @@ export class GameScene extends Scene {
     this.isGameOver = false;
     this.shakeTimer = 0;
     this.lastScoreMilestone = 0;
+    this.displayedScore = -1;
 
     if (this.initialized && this.spawner) {
       this.spawner.reset();
@@ -164,7 +166,10 @@ export class GameScene extends Scene {
     // Update score
     this.score += (CONFIG.scorePerSecond * delta) / 1000;
     const currentFloorScore = Math.floor(this.score);
-    this.scoreLabel.text = `${currentFloorScore}`;
+    if (currentFloorScore !== this.displayedScore) {
+      this.displayedScore = currentFloorScore;
+      this.scoreLabel.text = `${currentFloorScore}`;
+    }
 
     // Play score milestone sound every 100 points
     const milestone = Math.floor(currentFloorScore / 100);

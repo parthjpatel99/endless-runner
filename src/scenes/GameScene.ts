@@ -8,6 +8,8 @@ import { ParallaxLayer } from '../actors/ParallaxBackground';
 import { soundManager } from '../audio/SoundManager';
 
 export class GameScene extends Scene {
+  static lastScore = 0;
+
   private player!: Player;
   private ground!: Ground;
   private spawner!: ObstacleSpawner;
@@ -22,6 +24,7 @@ export class GameScene extends Scene {
   private shakeTimer = 0;
   private lastScoreMilestone = 0;
   private displayedScore = -1;
+  private sceneTransitionTimer = 0;
 
   onInitialize(engine: Engine) {
     this.setupParallax();
@@ -84,7 +87,7 @@ export class GameScene extends Scene {
     });
     this.add(this.scoreLabel);
 
-    const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0');
+    const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
     this.bestScoreLabel = new Label({
       text: `BEST  ${bestScore}`,
       pos: vec(CONFIG.width - 16, 28),
@@ -108,6 +111,7 @@ export class GameScene extends Scene {
     this.shakeTimer = 0;
     this.lastScoreMilestone = 0;
     this.displayedScore = -1;
+    this.sceneTransitionTimer = 0;
 
     if (this.initialized && this.spawner) {
       this.spawner.reset();
@@ -125,7 +129,7 @@ export class GameScene extends Scene {
     }
 
     if (this.initialized && this.bestScoreLabel) {
-      const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0');
+      const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
       this.bestScoreLabel.text = `BEST  ${bestScore}`;
     }
 
@@ -148,7 +152,6 @@ export class GameScene extends Scene {
     if (this.shakeTimer > 0) {
       this.shakeTimer -= delta;
       if (this.shakeTimer <= 0) {
-        // Shake just ended — snap camera back
         this.camera.pos.x = CONFIG.width / 2;
         this.camera.pos.y = CONFIG.height / 2;
       } else {
@@ -156,6 +159,14 @@ export class GameScene extends Scene {
         const intensity = CONFIG.shakeIntensity * progress;
         this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
         this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
+      }
+    }
+
+    // Game-time based scene transition (replaces setTimeout)
+    if (this.sceneTransitionTimer > 0) {
+      this.sceneTransitionTimer -= delta;
+      if (this.sceneTransitionTimer <= 0) {
+        engine.goToScene('gameover');
       }
     }
 
@@ -184,7 +195,7 @@ export class GameScene extends Scene {
     // Update speed
     this.speedTimer += delta / 1000;
     if (this.speedTimer >= CONFIG.speedInterval) {
-      this.speedTimer = 0;
+      this.speedTimer -= CONFIG.speedInterval;
       this.currentSpeed = Math.min(
         this.currentSpeed + CONFIG.speedIncrement,
         CONFIG.maxSpeed
@@ -207,16 +218,23 @@ export class GameScene extends Scene {
     this.shakeTimer = CONFIG.shakeDuration;
   }
 
-  private triggerGameOver(engine: Engine) {
+  private triggerGameOver(_engine: Engine) {
     this.isGameOver = true;
     soundManager.playGameOver();
     this.startScreenShake();
+
+    // Freeze all obstacles and player in place
+    for (const obs of this.spawner.getObstacles()) {
+      obs.vel.x = 0;
+    }
+    this.player.vel.x = 0;
+    this.player.vel.y = 0;
+
     // Store score for game over screen
-    (engine as any).lastScore = Math.floor(this.score);
-    // Delay scene transition slightly so shake is visible
-    setTimeout(() => {
-      engine.goToScene('gameover');
-    }, CONFIG.shakeDuration);
+    GameScene.lastScore = Math.floor(this.score);
+
+    // Transition after shake completes (game-time, not wall-clock)
+    this.sceneTransitionTimer = CONFIG.shakeDuration;
   }
 
   getCurrentScore() {

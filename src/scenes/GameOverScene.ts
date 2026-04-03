@@ -1,6 +1,7 @@
 import { Scene, Engine, Color, vec, Font, Label, Keys, TextAlign } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
 import { CONFIG } from '../config';
+import { GameScene } from './GameScene';
 
 export class GameOverScene extends Scene {
   private scoreLabel!: Label;
@@ -99,11 +100,10 @@ export class GameOverScene extends Scene {
     this.add(this.promptLabel);
   }
 
-  onActivate(ctx: SceneActivationContext) {
-    const engine = ctx.engine;
-    if (engine) {
-      const lastScore = (engine as any).lastScore || 0;
-      const prevBest = parseInt(localStorage.getItem('neonRunnerBest') || '0');
+  onActivate(_ctx: SceneActivationContext) {
+    {
+      const lastScore = GameScene.lastScore;
+      const prevBest = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
       const isNewBest = lastScore > prevBest;
 
       if (isNewBest) {

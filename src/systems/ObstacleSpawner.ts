@@ -18,9 +18,11 @@ export class ObstacleSpawner {
 
     if (this.timeUntilNextSpawn <= 0) {
       this.spawnObstacle(currentSpeed);
-      this.timeUntilNextSpawn =
-        CONFIG.minObstacleGap +
-        Math.random() * (CONFIG.maxObstacleGap - CONFIG.minObstacleGap);
+      // Scale gap with speed so obstacles stay clearable at high velocity
+      const speedScale = (currentSpeed - CONFIG.initialSpeed) * 0.3;
+      const minGap = CONFIG.minObstacleGap + speedScale;
+      const maxGap = CONFIG.maxObstacleGap + speedScale;
+      this.timeUntilNextSpawn = minGap + Math.random() * (maxGap - minGap);
     }
 
     // Move obstacles and remove off-screen ones (reverse iterate for safe in-place removal)

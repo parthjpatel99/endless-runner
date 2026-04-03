@@ -43,12 +43,18 @@ export class ParallaxLayer {
   update(currentSpeed: number, delta: number) {
     const dx = (currentSpeed * this.speedMultiplier * delta) / 1000;
 
+    // First pass: move all buildings
     for (const b of this.buildings) {
       b.actor.pos.x -= dx;
+    }
 
-      // If off screen left, teleport to right of the rightmost building
+    // Second pass: wrap any off-screen buildings to the right of the rightmost
+    for (const b of this.buildings) {
       if (b.actor.pos.x < -100) {
-        const maxX = Math.max(...this.buildings.map(b2 => b2.actor.pos.x));
+        let maxX = -Infinity;
+        for (const b2 of this.buildings) {
+          if (b2.actor.pos.x > maxX) maxX = b2.actor.pos.x;
+        }
         b.actor.pos.x = maxX + 80 + Math.random() * 60;
       }
     }

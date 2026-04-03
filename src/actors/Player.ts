@@ -1,11 +1,12 @@
 import { Actor, CollisionType, Color, Keys, Engine } from 'excalibur';
 import { CONFIG } from '../config';
 import { soundManager } from '../audio/SoundManager';
+import { Ground } from './Ground';
 
 export class Player extends Actor {
   private isOnGround = true;
   private jumpCount = 0;
-  private inputCooldown = 0; // frames to ignore input after reset
+  private inputCooldown = 0; // ms remaining to ignore input after reset
 
   constructor() {
     super({
@@ -19,25 +20,24 @@ export class Player extends Actor {
   }
 
   onInitialize(_engine: Engine) {
-    // Listen for collision with ground
     this.on('collisionstart', (evt) => {
-      if (evt.other.constructor.name === 'Ground') {
+      if (evt.other instanceof Ground) {
         this.isOnGround = true;
         this.jumpCount = 0;
       }
     });
 
     this.on('collisionend', (evt) => {
-      if (evt.other.constructor.name === 'Ground') {
+      if (evt.other instanceof Ground) {
         this.isOnGround = false;
       }
     });
   }
 
-  onPreUpdate(engine: Engine, _delta: number) {
+  onPreUpdate(engine: Engine, delta: number) {
     // Drain input cooldown (prevents auto-jump on scene restart via Space)
     if (this.inputCooldown > 0) {
-      this.inputCooldown--;
+      this.inputCooldown -= delta;
       return;
     }
 
@@ -76,7 +76,7 @@ export class Player extends Actor {
     this.jumpCount = 0;
     this.vel.x = 0;
     this.vel.y = 0;
-    this.inputCooldown = 5; // skip 5 frames to absorb the restart keypress
+    this.inputCooldown = 100; // 100ms to absorb the restart keypress
   }
 
   get onGround() {

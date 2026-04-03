@@ -2,13 +2,13 @@ export const CONFIG = {
   // Game
   width: 800,
   height: 400,
-  backgroundColor: '#1a1a2e',
+  backgroundColor: '#04040f',
 
   // Player
   playerX: 100,
-  playerWidth: 40,
-  playerHeight: 60,
-  playerColor: '#e94560',
+  playerWidth: 38,
+  playerHeight: 58,
+  playerColor: '#00f5d4',
   jumpForce: -700,
   gravity: 1800,
   groundY: 340,  // Y position of ground surface (feet of player)
@@ -17,7 +17,7 @@ export const CONFIG = {
   obstacleWidth: 30,
   obstacleMinHeight: 40,
   obstacleMaxHeight: 120,
-  obstacleColor: '#f5a623',
+  obstacleColor: '#f72585',
   minObstacleGap: 300,
   maxObstacleGap: 600,
 
@@ -31,15 +31,15 @@ export const CONFIG = {
   scorePerSecond: 10,
 
   // Ground
-  groundHeight: 20,
-  groundColor: '#16213e',
-  groundLineColor: '#0f3460',
+  groundHeight: 18,
+  groundColor: '#08081e',
+  groundLineColor: '#00f5d4',
 
   // Parallax layers (background to foreground)
   parallaxLayers: [
-    { color: '#16213e', speedMultiplier: 0.1, count: 6, width: 2, minHeight: 20, maxHeight: 60, yBase: 200 },
-    { color: '#0f3460', speedMultiplier: 0.3, count: 4, width: 3, minHeight: 40, maxHeight: 100, yBase: 250 },
-    { color: '#533483', speedMultiplier: 0.6, count: 3, width: 4, minHeight: 60, maxHeight: 140, yBase: 300 },
+    { color: '#0a1030', speedMultiplier: 0.1, count: 7, width: 2, minHeight: 25, maxHeight: 70, yBase: 210 },
+    { color: '#111f48', speedMultiplier: 0.3, count: 5, width: 3, minHeight: 45, maxHeight: 110, yBase: 255 },
+    { color: '#1e1256', speedMultiplier: 0.6, count: 4, width: 5, minHeight: 70, maxHeight: 150, yBase: 305 },
   ],
 
   // Screen shake
@@ -47,9 +47,9 @@ export const CONFIG = {
   shakeIntensity: 8,
 
   // Fonts and UI
-  scoreFont: '24px monospace',
-  titleFont: 'bold 48px monospace',
-  subtitleFont: '20px monospace',
-  uiColor: '#ffffff',
-  gameOverColor: '#e94560',
+  scoreFont: '22px "Orbitron", monospace',
+  titleFont: 'bold 52px "Orbitron", monospace',
+  subtitleFont: '16px "Orbitron", monospace',
+  uiColor: '#00f5d4',
+  gameOverColor: '#f72585',
 };

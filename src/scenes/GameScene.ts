@@ -1,4 +1,4 @@
-import { Scene, Engine, Color, vec, Font, Label, TextAlign } from 'excalibur';
+import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
 import { CONFIG } from '../config';
 import { Player } from '../actors/Player';
@@ -8,6 +8,8 @@ import { ParallaxLayer } from '../actors/ParallaxBackground';
 import { soundManager } from '../audio/SoundManager';
 
 export class GameScene extends Scene {
+  static lastScore = 0;
+
   private player!: Player;
   private ground!: Ground;
   private spawner!: ObstacleSpawner;
@@ -15,11 +17,14 @@ export class GameScene extends Scene {
   private currentSpeed = CONFIG.initialSpeed;
   private speedTimer = 0;
   private scoreLabel!: Label;
+  private bestScoreLabel!: Label;
   private isGameOver = false;
   private initialized = false;
   private parallaxLayers: ParallaxLayer[] = [];
   private shakeTimer = 0;
   private lastScoreMilestone = 0;
+  private displayedScore = -1;
+  private sceneTransitionTimer = 0;
 
   onInitialize(engine: Engine) {
     this.setupParallax();
@@ -49,6 +54,18 @@ export class GameScene extends Scene {
     this.ground = new Ground();
     this.add(this.ground);
 
+    // Neon glow line at ground surface
+    const groundLine = new Actor({
+      x: CONFIG.width / 2,
+      y: CONFIG.groundY,
+      width: CONFIG.width * 3,
+      height: 2,
+      color: Color.fromHex(CONFIG.groundLineColor),
+      collisionType: CollisionType.PreventCollision,
+      z: 2,
+    });
+    this.add(groundLine);
+
     this.player = new Player();
     this.add(this.player);
 
@@ -57,17 +74,32 @@ export class GameScene extends Scene {
 
   private setupUI(_engine: Engine) {
     this.scoreLabel = new Label({
-      text: 'Score: 0',
-      pos: vec(20, 20),
+      text: '0',
+      pos: vec(CONFIG.width / 2, 28),
       font: new Font({
-        size: 24,
-        color: Color.White,
-        family: 'monospace',
-        textAlign: TextAlign.Left,
+        size: 26,
+        bold: true,
+        color: Color.fromHex(CONFIG.uiColor),
+        family: '"Orbitron", monospace',
+        textAlign: TextAlign.Center,
       }),
       z: 10,
     });
     this.add(this.scoreLabel);
+
+    const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
+    this.bestScoreLabel = new Label({
+      text: `BEST  ${bestScore}`,
+      pos: vec(CONFIG.width - 16, 28),
+      font: new Font({
+        size: 14,
+        color: Color.fromHex('#2a8a7e'),
+        family: '"Orbitron", monospace',
+        textAlign: TextAlign.Right,
+      }),
+      z: 10,
+    });
+    this.add(this.bestScoreLabel);
   }
 
   onActivate(_ctx: SceneActivationContext) {
@@ -78,6 +110,8 @@ export class GameScene extends Scene {
     this.isGameOver = false;
     this.shakeTimer = 0;
     this.lastScoreMilestone = 0;
+    this.displayedScore = -1;
+    this.sceneTransitionTimer = 0;
 
     if (this.initialized && this.spawner) {
       this.spawner.reset();
@@ -91,7 +125,12 @@ export class GameScene extends Scene {
     }
 
     if (this.initialized && this.scoreLabel) {
-      this.scoreLabel.text = 'Score: 0';
+      this.scoreLabel.text = '0';
+    }
+
+    if (this.initialized && this.bestScoreLabel) {
+      const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
+      this.bestScoreLabel.text = `BEST  ${bestScore}`;
     }
 
     // Reset parallax layers
@@ -112,13 +151,23 @@ export class GameScene extends Scene {
     // Handle screen shake regardless of game over state
     if (this.shakeTimer > 0) {
       this.shakeTimer -= delta;
-      const progress = Math.max(0, this.shakeTimer / CONFIG.shakeDuration);
-      const intensity = CONFIG.shakeIntensity * progress;
-      this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
-      this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
-    } else if (!this.isGameOver) {
-      this.camera.pos.x = CONFIG.width / 2;
-      this.camera.pos.y = CONFIG.height / 2;
+      if (this.shakeTimer <= 0) {
+        this.camera.pos.x = CONFIG.width / 2;
+        this.camera.pos.y = CONFIG.height / 2;
+      } else {
+        const progress = this.shakeTimer / CONFIG.shakeDuration;
+        const intensity = CONFIG.shakeIntensity * progress;
+        this.camera.pos.x = CONFIG.width / 2 + (Math.random() - 0.5) * 2 * intensity;
+        this.camera.pos.y = CONFIG.height / 2 + (Math.random() - 0.5) * 2 * intensity;
+      }
+    }
+
+    // Game-time based scene transition (replaces setTimeout)
+    if (this.sceneTransitionTimer > 0) {
+      this.sceneTransitionTimer -= delta;
+      if (this.sceneTransitionTimer <= 0) {
+        engine.goToScene('gameover');
+      }
     }
 
     if (this.isGameOver) return;
@@ -131,7 +180,10 @@ export class GameScene extends Scene {
     // Update score
     this.score += (CONFIG.scorePerSecond * delta) / 1000;
     const currentFloorScore = Math.floor(this.score);
-    this.scoreLabel.text = `Score: ${currentFloorScore}`;
+    if (currentFloorScore !== this.displayedScore) {
+      this.displayedScore = currentFloorScore;
+      this.scoreLabel.text = `${currentFloorScore}`;
+    }
 
     // Play score milestone sound every 100 points
     const milestone = Math.floor(currentFloorScore / 100);
@@ -143,7 +195,7 @@ export class GameScene extends Scene {
     // Update speed
     this.speedTimer += delta / 1000;
     if (this.speedTimer >= CONFIG.speedInterval) {
-      this.speedTimer = 0;
+      this.speedTimer -= CONFIG.speedInterval;
       this.currentSpeed = Math.min(
         this.currentSpeed + CONFIG.speedIncrement,
         CONFIG.maxSpeed
@@ -166,16 +218,23 @@ export class GameScene extends Scene {
     this.shakeTimer = CONFIG.shakeDuration;
   }
 
-  private triggerGameOver(engine: Engine) {
+  private triggerGameOver(_engine: Engine) {
     this.isGameOver = true;
     soundManager.playGameOver();
     this.startScreenShake();
+
+    // Freeze all obstacles and player in place
+    for (const obs of this.spawner.getObstacles()) {
+      obs.vel.x = 0;
+    }
+    this.player.vel.x = 0;
+    this.player.vel.y = 0;
+
     // Store score for game over screen
-    (engine as any).lastScore = Math.floor(this.score);
-    // Delay scene transition slightly so shake is visible
-    setTimeout(() => {
-      engine.goToScene('gameover');
-    }, CONFIG.shakeDuration);
+    GameScene.lastScore = Math.floor(this.score);
+
+    // Transition after shake completes (game-time, not wall-clock)
+    this.sceneTransitionTimer = CONFIG.shakeDuration;
   }
 
   getCurrentScore() {

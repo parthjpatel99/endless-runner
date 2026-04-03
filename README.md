@@ -1,11 +1,11 @@
-# Endless Runner
+# Neon Runner
 
-A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). Jump over obstacles, survive as long as possible, and chase a high score as the world accelerates around you.
+A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). Jump over obstacles, survive as long as possible, and chase a high score as the neon cityscape accelerates around you.
 
 ![Game Preview](https://img.shields.io/badge/built%20with-Excalibur.js-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Vite](https://img.shields.io/badge/Vite-8.0-646cff)
 
 <div align="center">
-  <video src="https://github.com/user-attachments/assets/f1cdec67-71c3-479a-8e6e-82180fd01c51" autoplay loop muted playsinline width="800"></video>
+  <img src="docs/neon-runner-gameplay.gif" alt="Neon Runner gameplay" width="800">
 </div>
 
 ---
@@ -16,6 +16,26 @@ A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). 
 - Speed increases every 3 seconds — survive as long as you can
 - Score accumulates over time; every 100 points triggers an audio cue
 - Hit an obstacle → screen shake, game over, restart with `Space` or `Enter`
+
+---
+
+## What's New
+
+**Performance optimizations:**
+- Eliminated per-frame allocations in parallax and obstacle systems
+- GPU-accelerated CSS overlay layers
+- Cached `AudioContext.currentTime` in sound methods
+- Guarded score label updates to skip unnecessary redraws
+- Optimized camera shake reset (single call instead of per-frame check)
+
+**Bug fixes:**
+- AudioContext now resumes on first interaction (fixes silent audio in Chrome)
+- Obstacle gaps scale with speed so obstacles stay clearable at max difficulty
+- Game freezes player and obstacles during death shake (no ghost movement)
+- Scene transition syncs with shake completion for clean handoff
+- Time-based input cooldown on restart prevents ghost jumps
+- Score passes correctly from `GameScene` to `GameOverScene`
+- Replaced `setTimeout` with engine-time timer to prevent drift
 
 ---
 

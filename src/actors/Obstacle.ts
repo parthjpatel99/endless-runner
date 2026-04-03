@@ -9,7 +9,7 @@ export class Obstacle extends Actor {
       width: CONFIG.obstacleWidth,
       height,
       color: Color.fromHex(CONFIG.obstacleColor),
-      collisionType: CollisionType.Passive,
+      collisionType: CollisionType.PreventCollision,
     });
   }
 }

@@ -29,6 +29,9 @@ export const CONFIG = {
 
   // Score
   scorePerSecond: 10,
+  maxSubmittableScore: 10000,
+  globalRecordColor: '#ffd60a',
+  coffeeMessage: "You're #1! Email me at parth8199@gmail.com to claim a coffee",
 
   // Ground
   groundHeight: 18,

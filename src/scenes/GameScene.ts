@@ -6,9 +6,12 @@ import { Ground } from '../actors/Ground';
 import { ObstacleSpawner } from '../systems/ObstacleSpawner';
 import { ParallaxLayer } from '../actors/ParallaxBackground';
 import { soundManager } from '../audio/SoundManager';
+import { fetchGlobalHighScore } from '../api/highscore';
+import type { GlobalHighScore } from '../api/highscore';
 
 export class GameScene extends Scene {
   static lastScore = 0;
+  static globalRecord: GlobalHighScore = { score: 0, holder: '' };
 
   private player!: Player;
   private ground!: Ground;
@@ -18,6 +21,7 @@ export class GameScene extends Scene {
   private speedTimer = 0;
   private scoreLabel!: Label;
   private bestScoreLabel!: Label;
+  private worldRecordLabel!: Label;
   private isGameOver = false;
   private initialized = false;
   private parallaxLayers: ParallaxLayer[] = [];
@@ -100,6 +104,19 @@ export class GameScene extends Scene {
       z: 10,
     });
     this.add(this.bestScoreLabel);
+
+    this.worldRecordLabel = new Label({
+      text: 'WORLD RECORD  ---',
+      pos: vec(CONFIG.width - 16, 48),
+      font: new Font({
+        size: 12,
+        color: Color.fromHex(CONFIG.globalRecordColor),
+        family: '"Orbitron", monospace',
+        textAlign: TextAlign.Right,
+      }),
+      z: 10,
+    });
+    this.add(this.worldRecordLabel);
   }
 
   onActivate(_ctx: SceneActivationContext) {
@@ -145,6 +162,16 @@ export class GameScene extends Scene {
       this.camera.pos.x = CONFIG.width / 2;
       this.camera.pos.y = CONFIG.height / 2;
     }
+
+    // Fetch global high score (non-blocking)
+    fetchGlobalHighScore().then((record) => {
+      GameScene.globalRecord = record;
+      if (this.worldRecordLabel) {
+        this.worldRecordLabel.text = record.score > 0
+          ? `WORLD RECORD  ${record.score} by ${record.holder}`
+          : 'WORLD RECORD  ---';
+      }
+    });
   }
 
   onPreUpdate(engine: Engine, delta: number) {

@@ -202,7 +202,7 @@ export class GameOverScene extends Scene {
 
       // Show name input, submit, then show coffee banner
       showNameInput().then((name) => {
-        submitHighScore(lastScore, name).then((confirmed) => {
+        return submitHighScore(lastScore, name).then((confirmed) => {
           if (confirmed) {
             this.coffeeLabel.text = "You're #1! Email me to claim a coffee:";
             this.coffeeLabelLine2.text = 'parth8199@gmail.com';
@@ -211,15 +211,14 @@ export class GameOverScene extends Scene {
             // Update the cached global record
             GameScene.globalRecord = { score: lastScore, holder: name };
           }
-          this.canRestart = true;
         });
+      }).finally(() => {
+        this.canRestart = true;
       });
-    } else if (isNewBest) {
-      this.newBestLabel.graphics.opacity = 1;
-      this.worldRecordLabel.text = globalRecord.score > 0
-        ? `WORLD RECORD  ${globalRecord.score} by ${globalRecord.holder}`
-        : '';
     } else {
+      if (isNewBest) {
+        this.newBestLabel.graphics.opacity = 1;
+      }
       this.worldRecordLabel.text = globalRecord.score > 0
         ? `WORLD RECORD  ${globalRecord.score} by ${globalRecord.holder}`
         : '';

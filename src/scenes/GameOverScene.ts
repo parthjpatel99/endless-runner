@@ -121,6 +121,19 @@ export class GameOverScene extends Scene {
       if (this.newBestLabel) {
         this.newBestLabel.graphics.opacity = isNewBest ? 1 : 0;
       }
+
+      // Notify parent frame of game-over scores
+      if (window.parent !== window) {
+        window.parent.postMessage(
+          {
+            type: 'neonrunner:gameover',
+            score: lastScore,
+            best: displayBest,
+            isNewBest,
+          },
+          '*'
+        );
+      }
     }
 
     this.blinkTimer = 0;

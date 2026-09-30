@@ -1,3 +1,4 @@
+import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { validateSubmission } from './_validate.js';
 
@@ -6,6 +7,22 @@ const REDIS_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_
 const REDIS_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
 
 const redis = REDIS_URL && REDIS_TOKEN ? new Redis({ url: REDIS_URL, token: REDIS_TOKEN }) : null;
+
+// Only record-breaking runs submit, so a real player never gets near this;
+// it stops scripts from flooding the leaderboard with fake scores.
+const SUBMIT_LIMIT = 5;
+const submitLimiter = redis
+  ? new Ratelimit({ redis, limiter: Ratelimit.slidingWindow(SUBMIT_LIMIT, '10 m'), prefix: 'rl:highscore' })
+  : null;
+
+/** Vercel puts the client address in x-real-ip / x-forwarded-for */
+function clientIp(request: Request): string {
+  return (
+    request.headers.get('x-real-ip') ??
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
+    'unknown'
+  );
+}
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -60,7 +77,21 @@ export async function GET(): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  if (!redis) return unavailable();
+  if (!redis || !submitLimiter) return unavailable();
+
+  try {
+    const { success, reset } = await submitLimiter.limit(clientIp(request));
+    if (!success) {
+      const retryAfter = Math.max(1, Math.ceil((reset - Date.now()) / 1000));
+      return Response.json(
+        { error: 'Too many submissions — try again later' },
+        { status: 429, headers: { ...CORS_HEADERS, 'Retry-After': String(retryAfter) } }
+      );
+    }
+  } catch (err) {
+    console.error('Highscore API rate-limit error:', err);
+    return json({ error: 'Internal server error' }, 500);
+  }
 
   let body: unknown;
   try {

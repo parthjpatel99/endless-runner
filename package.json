@@ -17,6 +17,7 @@
     "vitest": "^4.1.11"
   },
   "dependencies": {
+    "@upstash/ratelimit": "^2.2.0",
     "@upstash/redis": "^1.37.0",
     "excalibur": "^0.32.0"
   }

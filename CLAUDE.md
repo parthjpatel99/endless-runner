@@ -14,7 +14,8 @@ Browser-based arcade game built with Excalibur.js v0.32, TypeScript 5.9, Vite 8,
 ## Key Commands
 - `npm run dev` — start dev server at localhost:5173
 - `npm test` — run unit tests
-- `npm run build` — production build → dist/
+- `npm run dev:api` — `vercel dev`, runs the real `/api/highscore` locally (plain `npm run dev` stubs `/api/*` with a 503)
+- `npm run build` — type-checks `src/` and `api/`, production build → dist/
 
 ## Adding Obstacles
 1. Create `src/actors/YourObstacle.ts` extending `Actor` (follow `Obstacle.ts` pattern)

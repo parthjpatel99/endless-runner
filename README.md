@@ -63,7 +63,8 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ### Other Commands
 
 ```bash
-npm run build    # production build → dist/
+npm run dev:api  # vercel dev — runs the real /api/highscore (needs the KV env vars)
+npm run build    # type-check game + API, production build → dist/
 npm run preview  # serve the production build locally
 npm test         # run unit tests
 ```

@@ -1,4 +1,4 @@
-import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType, Circle } from 'excalibur';
+import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType, Circle, Keys } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
 import { CONFIG, PALETTE } from '../config';
 import { Player } from '../actors/Player';
@@ -11,7 +11,10 @@ import type { GlobalHighScore } from '../api/highscore';
 
 export class GameScene extends Scene {
   static lastScore = 0;
-  static globalRecord: GlobalHighScore = { score: 0, holder: '' };
+  /** `null` until the leaderboard answers (or when it's unreachable) */
+  static globalRecord: GlobalHighScore | null = null;
+  /** The first run of a page load waits for input, so an embedded game doesn't die unattended */
+  static hasStarted = false;
 
   private player!: Player;
   private ground!: Ground;
@@ -30,6 +33,9 @@ export class GameScene extends Scene {
   private lastScoreMilestone = 0;
   private displayedScore = -1;
   private sceneTransitionTimer = 0;
+  private waitingToStart = false;
+  private startLabel!: Label;
+  private startBlink = 0;
 
   onInitialize(engine: Engine) {
     this.setupParallax();
@@ -146,6 +152,30 @@ export class GameScene extends Scene {
       z: 10,
     });
     this.add(this.worldRecordLabel);
+
+    this.startLabel = new Label({
+      text: 'PRESS  SPACE  OR  TAP  TO  START',
+      pos: vec(CONFIG.width / 2, 120),
+      font: new Font({
+        size: 15,
+        color: Color.fromHex(CONFIG.uiColor),
+        family: CONFIG.monoFamily,
+        textAlign: TextAlign.Center,
+      }),
+      z: 10,
+    });
+    this.add(this.startLabel);
+  }
+
+  private startInputPressed(engine: Engine) {
+    const kb = engine.input.keyboard;
+    return (
+      kb.wasPressed(Keys.Space) ||
+      kb.wasPressed(Keys.Up) ||
+      kb.wasPressed(Keys.ArrowUp) ||
+      kb.wasPressed(Keys.Enter) ||
+      engine.input.pointers.wasDown(0)
+    );
   }
 
   onActivate(_ctx: SceneActivationContext) {
@@ -158,6 +188,9 @@ export class GameScene extends Scene {
     this.lastScoreMilestone = 0;
     this.displayedScore = -1;
     this.sceneTransitionTimer = 0;
+    this.waitingToStart = !GameScene.hasStarted;
+    this.startBlink = 0;
+    if (this.startLabel) this.startLabel.graphics.opacity = this.waitingToStart ? 1 : 0;
 
     if (this.initialized && this.spawner) {
       this.spawner.reset();
@@ -169,6 +202,7 @@ export class GameScene extends Scene {
       this.player.pos.y = CONFIG.groundY - CONFIG.playerHeight / 2;
       this.player.reset();
     }
+    if (this.player) this.player.frozen = this.waitingToStart;
 
     if (this.initialized && this.scoreLabel) {
       this.scoreLabel.text = '0';
@@ -196,11 +230,14 @@ export class GameScene extends Scene {
     fetchGlobalHighScore().then((record) => {
       GameScene.globalRecord = record;
       if (this.worldRecordLabel) {
-        this.worldRecordLabel.text = record.score > 0
-          ? `WORLD RECORD  ${record.score} by ${record.holder}`
-          : 'WORLD RECORD  ---';
+        this.worldRecordLabel.text = GameScene.recordText(record);
       }
     });
+  }
+
+  static recordText(record: GlobalHighScore | null): string {
+    if (record === null) return 'WORLD RECORD  OFFLINE';
+    return record.score > 0 ? `WORLD RECORD  ${record.score} by ${record.holder}` : 'WORLD RECORD  ---';
   }
 
   onPreUpdate(engine: Engine, delta: number) {
@@ -227,6 +264,20 @@ export class GameScene extends Scene {
     }
 
     if (this.isGameOver) return;
+
+    // Start screen: hold everything until the first jump
+    if (this.waitingToStart) {
+      this.startBlink += delta;
+      this.startLabel.graphics.opacity = Math.sin(this.startBlink / 450) > 0 ? 1 : 0.25;
+      if (this.startInputPressed(engine)) {
+        this.waitingToStart = false;
+        GameScene.hasStarted = true;
+        this.startLabel.graphics.opacity = 0;
+        this.player.frozen = false;
+        this.player.reset(); // cooldown swallows the start press
+      }
+      return;
+    }
 
     // Update parallax layers
     for (const layer of this.parallaxLayers) {

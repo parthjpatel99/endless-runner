@@ -1,4 +1,4 @@
-import { Engine, DisplayMode, Color, vec } from 'excalibur';
+import { Engine, DisplayMode, Color, PointerScope, vec } from 'excalibur';
 import { CONFIG } from './config';
 import { GameScene } from './scenes/GameScene';
 import { GameOverScene } from './scenes/GameOverScene';
@@ -21,6 +21,8 @@ const game = new Engine({
   backgroundColor: Color.fromHex(CONFIG.backgroundColor),
   antialiasing: false,
   suppressPlayButton: true,
+  // Only taps on the game itself count — not taps on the name-entry overlay
+  pointerScope: PointerScope.Canvas,
   physics: {
     gravity: vec(0, CONFIG.gravity),
   },

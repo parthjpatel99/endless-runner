@@ -1,10 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
 
-const redis = new Redis({
-  url: process.env.KV_REST_API_URL!,
-  token: process.env.KV_REST_API_TOKEN!,
-});
+// Vercel's Upstash integration injects KV_REST_API_*; a direct Upstash setup uses UPSTASH_REDIS_REST_*
+const REDIS_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN = process.env.KV_REST_API_TOKEN ?? process.env.UPSTASH_REDIS_REST_TOKEN;
+
+const redis = REDIS_URL && REDIS_TOKEN ? new Redis({ url: REDIS_URL, token: REDIS_TOKEN }) : null;
 
 const MAX_SCORE = 10000;
 const MAX_NAME_LENGTH = 20;
@@ -15,7 +16,7 @@ interface HighScore {
   holder: string;
 }
 
-async function getHighScore(): Promise<HighScore> {
+async function getHighScore(redis: Redis): Promise<HighScore> {
   const data = await redis.hgetall<Record<string, string>>('highscore');
   if (!data || data['score'] === undefined) {
     return { score: 0, holder: '' };
@@ -32,14 +33,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).end();
   }
 
+  if (!redis) {
+    console.error('Highscore API: Redis is not configured (set KV_REST_API_URL / KV_REST_API_TOKEN)');
+    return res.status(503).json({ error: 'Leaderboard unavailable' });
+  }
+
   try {
     if (req.method === 'GET') {
-      const record = await getHighScore();
+      const record = await getHighScore(redis);
       return res.status(200).json(record);
     }
 
     if (req.method === 'POST') {
-      const { score, name } = req.body as { score: unknown; name: unknown };
+      const { score, name } = (req.body ?? {}) as { score?: unknown; name?: unknown };
 
       if (typeof score !== 'number' || !Number.isInteger(score) || score <= 0) {
         return res.status(400).json({ error: 'Invalid score' });

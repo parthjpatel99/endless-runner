@@ -2,7 +2,7 @@ import { Scene, Engine, Color, vec, Font, Label, Keys, TextAlign } from 'excalib
 import type { SceneActivationContext } from 'excalibur';
 import { CONFIG, PALETTE } from '../config';
 import { GameScene } from './GameScene';
-import { submitHighScore } from '../api/highscore';
+import { fetchGlobalHighScore, isWorldRecord, submitHighScore } from '../api/highscore';
 import { showNameInput } from '../ui/NameInputOverlay';
 
 export class GameOverScene extends Scene {
@@ -177,7 +177,7 @@ export class GameOverScene extends Scene {
 
     const displayBest = Math.max(lastScore, prevBest);
     const globalRecord = GameScene.globalRecord;
-    const isNewWorldRecord = lastScore > globalRecord.score;
+    const isNewWorldRecord = isWorldRecord(lastScore, globalRecord);
 
     // Update labels
     this.scoreLabel.text = `SCORE  ${lastScore}`;
@@ -199,15 +199,26 @@ export class GameOverScene extends Scene {
       this.canRestart = false;
 
       // Show name input, submit, then show coffee banner
+      // The server rejects anything above its cap, so submit at most that
+      const submitted = Math.min(lastScore, CONFIG.maxSubmittableScore);
       showNameInput().then((name) => {
-        return submitHighScore(lastScore, name).then((confirmed) => {
+        return submitHighScore(submitted, name).then(async (confirmed) => {
           if (confirmed) {
             this.coffeeLabel.text = "You're #1! Email me to claim a coffee:";
             this.coffeeLabelLine2.text = 'parth8199@gmail.com';
             this.coffeeLabel.graphics.opacity = 1;
             this.coffeeLabelLine2.graphics.opacity = 1;
             // Update the cached global record
-            GameScene.globalRecord = { score: lastScore, holder: name };
+            GameScene.globalRecord = { score: submitted, holder: name };
+          } else {
+            // Someone beat it mid-run, or the save failed — don't leave a false banner up
+            this.newRecordLabel.graphics.opacity = 0;
+            if (isNewBest) this.newBestLabel.graphics.opacity = 1;
+            const latest = await fetchGlobalHighScore();
+            GameScene.globalRecord = latest;
+            this.worldRecordLabel.text = latest === null
+              ? 'COULD NOT SAVE YOUR SCORE — LEADERBOARD OFFLINE'
+              : GameScene.recordText(latest);
           }
         });
       }).finally(() => {
@@ -217,8 +228,8 @@ export class GameOverScene extends Scene {
       if (isNewBest) {
         this.newBestLabel.graphics.opacity = 1;
       }
-      this.worldRecordLabel.text = globalRecord.score > 0
-        ? `WORLD RECORD  ${globalRecord.score} by ${globalRecord.holder}`
+      this.worldRecordLabel.text = globalRecord === null || globalRecord.score > 0
+        ? GameScene.recordText(globalRecord)
         : '';
     }
 

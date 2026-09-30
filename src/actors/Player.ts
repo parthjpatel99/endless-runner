@@ -42,6 +42,8 @@ export class Player extends Actor {
   private strideTimer = 0;
   private frames = { a: runnerFrame('a'), b: runnerFrame('b'), air: runnerFrame('air') };
   private currentFrame: 'a' | 'b' | 'air' = 'a';
+  /** While true the runner stands still and ignores input (start screen) */
+  frozen = false;
 
   constructor() {
     super({
@@ -77,6 +79,11 @@ export class Player extends Actor {
   }
 
   onPreUpdate(engine: Engine, delta: number) {
+    if (this.frozen) {
+      this.setFrame('a');
+      return;
+    }
+
     // Drain input cooldown (prevents auto-jump on scene restart via Space)
     if (this.inputCooldown > 0) {
       this.inputCooldown -= delta;

@@ -5,35 +5,36 @@ export function showNameInput(): Promise<string> {
     overlay.style.cssText = `
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      z-index: 1000; background: rgba(0,0,0,0.5);
+      z-index: 1000; background: rgba(20,17,14,0.6);
     `;
 
     const box = document.createElement('div');
     box.style.cssText = `
-      background: #0a0a1e; border: 2px solid #ffd60a; border-radius: 8px;
-      padding: 24px; text-align: center; font-family: "Orbitron", monospace;
+      background: #1d1915; border: 1px solid #463c33; border-radius: 18px;
+      padding: 28px 32px; text-align: center; font-family: "IBM Plex Mono", ui-monospace, monospace;
+      box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
     `;
 
     const label = document.createElement('div');
-    label.textContent = 'Enter your name:';
-    label.style.cssText = 'color: #ffd60a; font-size: 16px; margin-bottom: 12px;';
+    label.textContent = 'New world record. Sign the map:';
+    label.style.cssText = 'color: #ffc15e; font-size: 13px; letter-spacing: 0.08em; margin-bottom: 14px; text-transform: uppercase;';
 
     const input = document.createElement('input');
     input.type = 'text';
     input.maxLength = 20;
     input.placeholder = 'Anonymous';
     input.style.cssText = `
-      background: #111; color: #00f5d4; border: 1px solid #00f5d4; border-radius: 4px;
-      padding: 8px 12px; font-size: 16px; font-family: "Orbitron", monospace;
-      text-align: center; outline: none; width: 200px;
+      background: #14110e; color: #f1e9dc; border: 1px solid #463c33; border-radius: 999px;
+      padding: 10px 16px; font-size: 16px; font-family: "IBM Plex Mono", ui-monospace, monospace;
+      text-align: center; outline: none; width: 220px;
     `;
 
     const btn = document.createElement('button');
     btn.textContent = 'SUBMIT';
     btn.style.cssText = `
-      display: block; margin: 12px auto 0; background: #ffd60a; color: #0a0a1e;
-      border: none; border-radius: 4px; padding: 8px 24px; font-size: 14px;
-      font-family: "Orbitron", monospace; font-weight: bold; cursor: pointer;
+      display: block; margin: 14px auto 0; background: #ff8a3d; color: #14110e;
+      border: none; border-radius: 999px; padding: 12px 28px; font-size: 14px;
+      font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; cursor: pointer;
     `;
 
     function submit() {

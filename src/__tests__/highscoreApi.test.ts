@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fetchGlobalHighScore, submitHighScore } from '../api/highscore';
+import { fetchGlobalHighScore, isWorldRecord, submitHighScore } from '../api/highscore';
 
 describe('fetchGlobalHighScore', () => {
   beforeEach(() => {
@@ -20,11 +20,55 @@ describe('fetchGlobalHighScore', () => {
     expect(result).toEqual({ score: 500, holder: 'alice' });
   });
 
-  it('returns zeroed record on fetch failure', async () => {
+  it('returns null (unknown) on fetch failure', async () => {
     vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
 
     const result = await fetchGlobalHighScore();
-    expect(result).toEqual({ score: 0, holder: '' });
+    expect(result).toBeNull();
+  });
+
+  it('returns null (unknown) when the API errors', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: async () => ({ error: 'Internal server error' }),
+    } as Response);
+
+    expect(await fetchGlobalHighScore()).toBeNull();
+  });
+
+  it('returns null for a malformed payload', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ error: 'nope' }),
+    } as Response);
+
+    expect(await fetchGlobalHighScore()).toBeNull();
+  });
+
+  it('returns an empty record when nobody has set one yet', async () => {
+    vi.mocked(fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({ score: 0, holder: '' }),
+    } as Response);
+
+    expect(await fetchGlobalHighScore()).toEqual({ score: 0, holder: '' });
+  });
+});
+
+describe('isWorldRecord', () => {
+  it('is never true against an unknown record', () => {
+    expect(isWorldRecord(9999, null)).toBe(false);
+  });
+
+  it('requires beating the current record', () => {
+    expect(isWorldRecord(500, { score: 500, holder: 'alice' })).toBe(false);
+    expect(isWorldRecord(501, { score: 500, holder: 'alice' })).toBe(true);
+  });
+
+  it('counts any positive score against an empty leaderboard', () => {
+    expect(isWorldRecord(1, { score: 0, holder: '' })).toBe(true);
+    expect(isWorldRecord(0, { score: 0, holder: '' })).toBe(false);
   });
 });
 

@@ -1,71 +1,92 @@
-import { Actor, CollisionType, Color, Scene } from 'excalibur';
+import { Actor, CollisionType, Color, Polygon, Scene, vec } from 'excalibur';
 import { CONFIG } from '../config';
 
-interface Building {
+export interface RidgeLayerConfig {
+  color: string;
+  speedMultiplier: number;
+  count: number;
+  minWidth: number;
+  maxWidth: number;
+  minHeight: number;
+  maxHeight: number;
+  yBase: number;
+}
+
+interface Peak {
   actor: Actor;
+  width: number;
+}
+
+/** A lopsided mesa/peak silhouette — like the Tucson Mountains at dusk */
+function peakShape(w: number, h: number): Polygon {
+  const crest = 0.35 + Math.random() * 0.3;
+  return new Polygon({
+    points: [
+      vec(0, h),
+      vec(w * (crest - 0.18), h * 0.35),
+      vec(w * crest, 0),
+      vec(w * (crest + 0.08), h * 0.12),
+      vec(w * (crest + 0.22), h * 0.4),
+      vec(w, h),
+    ],
+    color: Color.fromHex(CONFIG.backgroundColor),
+  });
 }
 
 export class ParallaxLayer {
-  private buildings: Building[] = [];
+  private peaks: Peak[] = [];
   private speedMultiplier: number;
 
-  constructor(
-    scene: Scene,
-    speedMultiplier: number,
-    color: string,
-    count: number,
-    yBase: number,
-    minH: number,
-    maxH: number,
-    zIndex: number
-  ) {
-    this.speedMultiplier = speedMultiplier;
+  constructor(scene: Scene, layer: RidgeLayerConfig, zIndex: number) {
+    this.speedMultiplier = layer.speedMultiplier;
 
-    const spacing = CONFIG.width / count;
-    for (let i = 0; i < count + 2; i++) {
-      const h = minH + Math.random() * (maxH - minH);
-      const w = 30 + Math.random() * 40;
+    const spacing = CONFIG.width / layer.count;
+    for (let i = 0; i < layer.count + 2; i++) {
+      const h = layer.minHeight + Math.random() * (layer.maxHeight - layer.minHeight);
+      const w = layer.minWidth + Math.random() * (layer.maxWidth - layer.minWidth);
       const actor = new Actor({
         x: i * spacing + Math.random() * 20,
-        y: yBase - h / 2,
+        y: layer.yBase - h / 2,
         width: w,
         height: h,
-        color: Color.fromHex(color),
         collisionType: CollisionType.PreventCollision,
         z: zIndex,
-        anchor: { x: 0.5, y: 0.5 } as any,
       });
+      const shape = peakShape(w, h);
+      shape.color = Color.fromHex(layer.color);
+      actor.graphics.use(shape);
       scene.add(actor);
-      this.buildings.push({ actor });
+      this.peaks.push({ actor, width: w });
     }
   }
 
   update(currentSpeed: number, delta: number) {
     const dx = (currentSpeed * this.speedMultiplier * delta) / 1000;
 
-    // First pass: move all buildings
-    for (const b of this.buildings) {
-      b.actor.pos.x -= dx;
+    // First pass: move all peaks
+    for (const p of this.peaks) {
+      p.actor.pos.x -= dx;
     }
 
-    // Second pass: wrap any off-screen buildings to the right of the rightmost
-    for (const b of this.buildings) {
-      if (b.actor.pos.x < -100) {
+    // Second pass: wrap any off-screen peak to just behind the rightmost one
+    for (const p of this.peaks) {
+      if (p.actor.pos.x < -p.width) {
         let maxX = -Infinity;
-        for (const b2 of this.buildings) {
-          if (b2.actor.pos.x > maxX) maxX = b2.actor.pos.x;
+        for (const p2 of this.peaks) {
+          if (p2.actor.pos.x > maxX) maxX = p2.actor.pos.x;
         }
-        b.actor.pos.x = maxX + 80 + Math.random() * 60;
+        // Overlap neighbours so the ridgeline stays continuous
+        p.actor.pos.x = maxX + p.width * (0.45 + Math.random() * 0.25);
       }
     }
   }
 
   reset() {
-    // Scatter buildings across screen width on reset
-    const count = this.buildings.length;
+    // Scatter peaks across screen width on reset
+    const count = this.peaks.length;
     const spacing = CONFIG.width / Math.max(count - 2, 1);
     for (let i = 0; i < count; i++) {
-      this.buildings[i].actor.pos.x = i * spacing + Math.random() * 20;
+      this.peaks[i].actor.pos.x = i * spacing + Math.random() * 20;
     }
   }
 }

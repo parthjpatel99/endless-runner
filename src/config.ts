@@ -1,23 +1,45 @@
+// Palette shared with parthjpatel.me ("Telemetry from the Sonoran desert")
+export const PALETTE = {
+  sky: '#2a211b',
+  skyBand: '#3a2a20',
+  sun: '#ff8a3d',
+  ridgeFar: '#4a3326',
+  ridgeMid: '#5b3a2a',
+  ridgeNear: '#7a4a32',
+  sand: '#c98a5a',
+  sandDark: '#b0764a',
+  cream: '#f1e9dc',
+  ink: '#1a1714',
+  saguaro: '#3f6b4a',
+  saguaroDark: '#325a3c',
+  muted: '#bdb1a1',
+  gold: '#ffc15e',
+};
+
 export const CONFIG = {
   // Game
   width: 800,
   height: 400,
-  backgroundColor: '#04040f',
+  backgroundColor: PALETTE.sky,
 
   // Player
   playerX: 100,
   playerWidth: 38,
   playerHeight: 58,
-  playerColor: '#00f5d4',
+  playerColor: PALETTE.cream,
+  playerEyeColor: PALETTE.ink,
+  playerStrideMs: 110, // time per leg frame while running
   jumpForce: -700,
   gravity: 1800,
   groundY: 340,  // Y position of ground surface (feet of player)
 
-  // Obstacles
+  // Obstacles (saguaros — the trunk is the hitbox, arms are cosmetic)
   obstacleWidth: 30,
   obstacleMinHeight: 40,
   obstacleMaxHeight: 120,
-  obstacleColor: '#f72585',
+  obstacleColor: PALETTE.saguaro,
+  obstacleRibColor: PALETTE.saguaroDark,
+  obstacleArmMinHeight: 64, // shorter cacti have no arms
   minObstacleGap: 300,
   maxObstacleGap: 600,
 
@@ -30,19 +52,27 @@ export const CONFIG = {
   // Score
   scorePerSecond: 10,
   maxSubmittableScore: 10000,
-  globalRecordColor: '#ffd60a',
+  globalRecordColor: PALETTE.gold,
   coffeeMessage: "You're #1! Email me at parth8199@gmail.com to claim a coffee",
 
-  // Ground
-  groundHeight: 18,
-  groundColor: '#08081e',
-  groundLineColor: '#00f5d4',
+  // Ground (fills the canvas below the running surface)
+  groundHeight: 60,
+  groundColor: PALETTE.sand,
+  groundLineColor: PALETTE.cream,
+  pebbleColor: PALETTE.sandDark,
+  pebbleCount: 14,
 
-  // Parallax layers (background to foreground)
+  // Sun
+  sunX: 560,
+  sunY: 205,
+  sunRadius: 62,
+  sunColor: PALETTE.sun,
+
+  // Parallax ridgelines (background to foreground)
   parallaxLayers: [
-    { color: '#0a1030', speedMultiplier: 0.1, count: 7, width: 2, minHeight: 25, maxHeight: 70, yBase: 210 },
-    { color: '#111f48', speedMultiplier: 0.3, count: 5, width: 3, minHeight: 45, maxHeight: 110, yBase: 255 },
-    { color: '#1e1256', speedMultiplier: 0.6, count: 4, width: 5, minHeight: 70, maxHeight: 150, yBase: 305 },
+    { color: PALETTE.ridgeFar, speedMultiplier: 0.1, count: 5, minWidth: 220, maxWidth: 340, minHeight: 50, maxHeight: 95, yBase: 262 },
+    { color: PALETTE.ridgeMid, speedMultiplier: 0.3, count: 5, minWidth: 180, maxWidth: 300, minHeight: 45, maxHeight: 85, yBase: 300 },
+    { color: PALETTE.ridgeNear, speedMultiplier: 0.6, count: 6, minWidth: 140, maxWidth: 240, minHeight: 30, maxHeight: 60, yBase: 342 },
   ],
 
   // Screen shake
@@ -50,9 +80,10 @@ export const CONFIG = {
   shakeIntensity: 8,
 
   // Fonts and UI
-  scoreFont: '22px "Orbitron", monospace',
-  titleFont: 'bold 52px "Orbitron", monospace',
-  subtitleFont: '16px "Orbitron", monospace',
-  uiColor: '#00f5d4',
-  gameOverColor: '#f72585',
+  monoFamily: '"IBM Plex Mono", ui-monospace, monospace',
+  displayFamily: '"Instrument Serif", Georgia, serif',
+  uiColor: PALETTE.cream,
+  uiMutedColor: PALETTE.muted,
+  accentColor: PALETTE.sun,
+  gameOverColor: PALETTE.sun,
 };

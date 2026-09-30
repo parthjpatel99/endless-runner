@@ -1,7 +1,8 @@
-import { Engine, DisplayMode, Color, vec } from 'excalibur';
+import { Engine, DisplayMode, Color, PointerScope, vec } from 'excalibur';
 import { CONFIG } from './config';
 import { GameScene } from './scenes/GameScene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { listenForTaps } from './systems/TapInput';
 
 // Prevent browser from scrolling on Space/Arrow keys used for gameplay
 window.addEventListener('keydown', (e) => {
@@ -10,8 +11,9 @@ window.addEventListener('keydown', (e) => {
   }
 }, { passive: false });
 
-// Pre-load Orbitron so canvas text uses it from first frame
-document.fonts.load('700 24px "Orbitron"').catch(() => {});
+// Pre-load the UI fonts so canvas text uses them from the first frame
+document.fonts.load('24px "IBM Plex Mono"').catch(() => {});
+document.fonts.load('72px "Instrument Serif"').catch(() => {});
 
 const game = new Engine({
   width: CONFIG.width,
@@ -20,10 +22,14 @@ const game = new Engine({
   backgroundColor: Color.fromHex(CONFIG.backgroundColor),
   antialiasing: false,
   suppressPlayButton: true,
+  // Only taps on the game itself count — not taps on the name-entry overlay
+  pointerScope: PointerScope.Canvas,
   physics: {
     gravity: vec(0, CONFIG.gravity),
   },
 });
+
+listenForTaps(game);
 
 game.add('game', new GameScene());
 game.add('gameover', new GameOverScene());

@@ -111,4 +111,4 @@ All tunable constants live in [`src/config.ts`](src/config.ts):
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Parth Patel

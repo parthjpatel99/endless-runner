@@ -40,6 +40,8 @@ game.start().then(() => {
   const canvas = game.canvas;
   if (canvas) {
     canvas.setAttribute('tabindex', '0');
+    canvas.setAttribute('role', 'application');
+    canvas.setAttribute('aria-label', 'Desert Runner. Press Space, Up arrow, or tap to jump over the saguaros.');
     canvas.focus();
   }
 });

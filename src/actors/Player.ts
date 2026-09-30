@@ -3,6 +3,7 @@ import type { GraphicsGrouping } from 'excalibur';
 import { CONFIG } from '../config';
 import { soundManager } from '../audio/SoundManager';
 import { Ground } from './Ground';
+import { consumeTap } from '../systems/TapInput';
 
 const W = CONFIG.playerWidth;
 const H = CONFIG.playerHeight;
@@ -84,6 +85,9 @@ export class Player extends Actor {
       return;
     }
 
+    // Read (and clear) any tap every frame so taps during the cooldown are discarded
+    const tapped = consumeTap();
+
     // Drain input cooldown (prevents auto-jump on scene restart via Space)
     if (this.inputCooldown > 0) {
       this.inputCooldown -= delta;
@@ -105,7 +109,7 @@ export class Player extends Actor {
       (engine.input.keyboard.wasPressed(Keys.Space) ||
         engine.input.keyboard.wasPressed(Keys.Up) ||
         engine.input.keyboard.wasPressed(Keys.ArrowUp) ||
-        engine.input.pointers.wasDown(0)) &&
+        tapped) &&
       this.isOnGround
     ) {
       this.vel.y = CONFIG.jumpForce;

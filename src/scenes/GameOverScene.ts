@@ -4,6 +4,7 @@ import { CONFIG, PALETTE } from '../config';
 import { GameScene } from './GameScene';
 import { fetchGlobalHighScore, isWorldRecord, submitHighScore } from '../api/highscore';
 import { showNameInput } from '../ui/NameInputOverlay';
+import { consumeTap } from '../systems/TapInput';
 
 export class GameOverScene extends Scene {
   private scoreLabel!: Label;
@@ -243,12 +244,14 @@ export class GameOverScene extends Scene {
       this.promptLabel.graphics.opacity = Math.sin(this.blinkTimer / 450) > 0 ? 1 : 0.2;
     }
 
+    // Always consume, so taps made while the name overlay is up don't restart later
+    const tapped = consumeTap();
     if (!this.canRestart) return;
 
     if (
       engine.input.keyboard.wasPressed(Keys.Space) ||
       engine.input.keyboard.wasPressed(Keys.Enter) ||
-      engine.input.pointers.wasDown(0)
+      tapped
     ) {
       engine.goToScene('game');
     }

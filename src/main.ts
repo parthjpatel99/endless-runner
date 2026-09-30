@@ -2,6 +2,7 @@ import { Engine, DisplayMode, Color, PointerScope, vec } from 'excalibur';
 import { CONFIG } from './config';
 import { GameScene } from './scenes/GameScene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { listenForTaps } from './systems/TapInput';
 
 // Prevent browser from scrolling on Space/Arrow keys used for gameplay
 window.addEventListener('keydown', (e) => {
@@ -27,6 +28,8 @@ const game = new Engine({
     gravity: vec(0, CONFIG.gravity),
   },
 });
+
+listenForTaps(game);
 
 game.add('game', new GameScene());
 game.add('gameover', new GameOverScene());

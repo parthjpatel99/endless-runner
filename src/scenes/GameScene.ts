@@ -6,6 +6,7 @@ import { Ground } from '../actors/Ground';
 import { ObstacleSpawner } from '../systems/ObstacleSpawner';
 import { ParallaxLayer } from '../actors/ParallaxBackground';
 import { soundManager } from '../audio/SoundManager';
+import { consumeTap } from '../systems/TapInput';
 import { fetchGlobalHighScore } from '../api/highscore';
 import type { GlobalHighScore } from '../api/highscore';
 
@@ -174,7 +175,7 @@ export class GameScene extends Scene {
       kb.wasPressed(Keys.Up) ||
       kb.wasPressed(Keys.ArrowUp) ||
       kb.wasPressed(Keys.Enter) ||
-      engine.input.pointers.wasDown(0)
+      consumeTap()
     );
   }
 
@@ -189,6 +190,7 @@ export class GameScene extends Scene {
     this.displayedScore = -1;
     this.sceneTransitionTimer = 0;
     this.waitingToStart = !GameScene.hasStarted;
+    consumeTap(); // drop the tap that restarted us
     this.startBlink = 0;
     if (this.startLabel) this.startLabel.graphics.opacity = this.waitingToStart ? 1 : 0;
 

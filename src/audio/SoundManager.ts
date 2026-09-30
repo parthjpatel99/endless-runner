@@ -1,5 +1,17 @@
+const MUTE_KEY = 'desertRunnerMuted';
+
 class SoundManager {
   private ctx: AudioContext | null = null;
+  muted = readMuted();
+
+  setMuted(muted: boolean) {
+    this.muted = muted;
+    try {
+      localStorage.setItem(MUTE_KEY, muted ? '1' : '0');
+    } catch {
+      // storage unavailable (private mode) — keep it for this session only
+    }
+  }
 
   private getCtx(): AudioContext {
     if (!this.ctx) {
@@ -12,6 +24,7 @@ class SoundManager {
   }
 
   playJump() {
+    if (this.muted) return;
     const ctx = this.getCtx();
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -27,6 +40,7 @@ class SoundManager {
   }
 
   playGameOver() {
+    if (this.muted) return;
     const ctx = this.getCtx();
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -43,6 +57,7 @@ class SoundManager {
   }
 
   playScore() {
+    if (this.muted) return;
     const ctx = this.getCtx();
     const now = ctx.currentTime;
     const osc = ctx.createOscillator();
@@ -54,6 +69,14 @@ class SoundManager {
     gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
     osc.start(now);
     osc.stop(now + 0.05);
+  }
+}
+
+function readMuted(): boolean {
+  try {
+    return localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
   }
 }
 

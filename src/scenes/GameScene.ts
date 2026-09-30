@@ -16,6 +16,8 @@ export class GameScene extends Scene {
   static globalRecord: GlobalHighScore | null = null;
   /** The first run of a page load waits for input, so an embedded game doesn't die unattended */
   static hasStarted = false;
+  /** True only mid-run (not on the start screen or after a crash) — gates pausing */
+  static playing = false;
 
   private player!: Player;
   private ground!: Ground;
@@ -60,6 +62,22 @@ export class GameScene extends Scene {
       this.add(new Actor({ x, y, width, height, color: Color.fromHex(color), collisionType: CollisionType.PreventCollision, z }));
 
     decor(CONFIG.width / 2, 225, CONFIG.width * 3, 90, PALETTE.skyBand, -30);
+
+    // A sparse starfield, mostly above the 400px world — visible on tall/portrait screens
+    for (let i = 0; i < 70; i++) {
+      const size = Math.random() < 0.15 ? 3 : 2;
+      const star = new Actor({
+        x: -400 + Math.random() * (CONFIG.width + 800),
+        y: -700 + Math.random() * 840,
+        width: size,
+        height: size,
+        color: Color.fromHex(PALETTE.cream),
+        collisionType: CollisionType.PreventCollision,
+        z: -40,
+      });
+      star.graphics.opacity = 0.25 + Math.random() * 0.5;
+      this.add(star);
+    }
 
     const sun = new Actor({ x: CONFIG.sunX, y: CONFIG.sunY, collisionType: CollisionType.PreventCollision, z: -25 });
     sun.graphics.use(new Circle({ radius: CONFIG.sunRadius, color: Color.fromHex(CONFIG.sunColor) }));
@@ -190,6 +208,7 @@ export class GameScene extends Scene {
     this.displayedScore = -1;
     this.sceneTransitionTimer = 0;
     this.waitingToStart = !GameScene.hasStarted;
+    GameScene.playing = !this.waitingToStart;
     consumeTap(); // drop the tap that restarted us
     this.startBlink = 0;
     if (this.startLabel) this.startLabel.graphics.opacity = this.waitingToStart ? 1 : 0;
@@ -274,6 +293,7 @@ export class GameScene extends Scene {
       if (this.startInputPressed(engine)) {
         this.waitingToStart = false;
         GameScene.hasStarted = true;
+        GameScene.playing = true;
         this.startLabel.graphics.opacity = 0;
         this.player.frozen = false;
         this.player.reset(); // cooldown swallows the start press
@@ -336,6 +356,7 @@ export class GameScene extends Scene {
 
   private triggerGameOver(_engine: Engine) {
     this.isGameOver = true;
+    GameScene.playing = false;
     soundManager.playGameOver();
     this.startScreenShake();
 

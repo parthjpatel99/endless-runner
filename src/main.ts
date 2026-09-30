@@ -3,6 +3,7 @@ import { CONFIG } from './config';
 import { GameScene } from './scenes/GameScene';
 import { GameOverScene } from './scenes/GameOverScene';
 import { listenForTaps } from './systems/TapInput';
+import { mountControls } from './ui/Controls';
 
 // Prevent browser from scrolling on Space/Arrow keys used for gameplay
 window.addEventListener('keydown', (e) => {
@@ -44,4 +45,5 @@ game.start().then(() => {
     canvas.setAttribute('aria-label', 'Desert Runner. Press Space, Up arrow, or tap to jump over the saguaros.');
     canvas.focus();
   }
+  mountControls(game, () => GameScene.playing);
 });

@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import { validateSubmission } from './_validate';
+import { validateSubmission } from './_validate.js';
 
 // Vercel's Upstash integration injects KV_REST_API_*; a direct Upstash setup uses UPSTASH_REDIS_REST_*
 const REDIS_URL = process.env.KV_REST_API_URL ?? process.env.UPSTASH_REDIS_REST_URL;

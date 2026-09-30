@@ -23,6 +23,7 @@ export function showNameInput(): Promise<string> {
     input.type = 'text';
     input.maxLength = 20;
     input.placeholder = 'Anonymous';
+    input.setAttribute('aria-label', 'Your name for the world record');
     input.style.cssText = `
       background: #14110e; color: #f1e9dc; border: 1px solid #463c33; border-radius: 999px;
       padding: 10px 16px; font-size: 16px; font-family: "IBM Plex Mono", ui-monospace, monospace;

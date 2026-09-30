@@ -82,8 +82,64 @@
         padding: 1px 7px;
       }
 
+      /* Mute / pause — top-left, clear of the HUD (score centre, best right) */
+      #controls {
+        position: fixed;
+        top: max(12px, env(safe-area-inset-top));
+        left: max(12px, env(safe-area-inset-left));
+        z-index: 210;
+        display: flex;
+        gap: 8px;
+      }
+
+      #controls button {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 999px;
+        border: 1px solid rgba(241, 233, 220, 0.25);
+        background: rgba(20, 17, 14, 0.55);
+        color: #f1e9dc;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      #controls button:hover { border-color: rgba(241, 233, 220, 0.6); }
+      #controls button:focus-visible,
+      #pause-overlay:focus-visible { outline: 2px dashed #ff8a3d; outline-offset: 3px; }
+      #controls button[hidden] { display: none; }
+
+      #pause-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 205;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        border: 0;
+        background: rgba(20, 17, 14, 0.62);
+        color: #f1e9dc;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      #pause-overlay[hidden] { display: none; }
+      #pause-overlay .title { font-family: 'Instrument Serif', Georgia, serif; font-size: clamp(48px, 9vw, 88px); line-height: 1; color: #ff8a3d; }
+      #pause-overlay .sub { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+      #hint-bar .portrait { display: none; }
+
       @media (hover: none) {
         #hint-bar .keys { display: none; }
+      }
+
+      /* Portrait phones: the 2:1 world is small — suggest rotating */
+      @media (hover: none) and (orientation: portrait) {
+        #hint-bar .portrait { display: inline; }
+        #hint-bar .dodge { display: none; }
       }
       @media (hover: hover) {
         #hint-bar .touch { display: none; }
@@ -97,7 +153,8 @@
       <span class="keys"><kbd>Space</kbd> or <kbd>↑</kbd> to jump</span>
       <span class="touch">Tap to jump</span>
       <span>·</span>
-      <span>dodge the saguaros</span>
+      <span class="dodge">dodge the saguaros</span>
+      <span class="portrait">turn sideways for a wider view</span>
     </div>
     <main id="app"><h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Desert Runner</h1></main>
     <script type="module" src="/src/main.ts"></script>

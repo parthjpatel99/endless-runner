@@ -13,6 +13,7 @@ A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). 
 ## Gameplay
 
 - **Jump** over incoming saguaros using `Space`, `↑`, or a tap/click
+- **Pause** with `P` / `Esc` or the on-screen button (also pauses when you switch tabs); **mute** with `M` — remembered between visits
 - Speed increases every 3 seconds — survive as long as you can
 - Score accumulates over time; every 100 points triggers an audio cue
 - Hit a cactus → screen shake, game over, restart with `Space`, `Enter`, or a tap

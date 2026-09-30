@@ -10,8 +10,9 @@ window.addEventListener('keydown', (e) => {
   }
 }, { passive: false });
 
-// Pre-load Orbitron so canvas text uses it from first frame
-document.fonts.load('700 24px "Orbitron"').catch(() => {});
+// Pre-load the UI fonts so canvas text uses them from the first frame
+document.fonts.load('24px "IBM Plex Mono"').catch(() => {});
+document.fonts.load('72px "Instrument Serif"').catch(() => {});
 
 const game = new Engine({
   width: CONFIG.width,

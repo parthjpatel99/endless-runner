@@ -1,21 +1,21 @@
-# Neon Runner
+# Desert Runner
 
-A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). Jump over obstacles, survive as long as possible, and chase a high score as the neon cityscape accelerates around you.
+A browser-based arcade game built with [Excalibur.js](https://excaliburjs.com). Jump over saguaros, survive as long as possible, and chase a high score as the Sonoran desert speeds up around you. Styled to match [parthjpatel.me](https://parthjpatel.me), where it's embedded as "Recess".
 
 ![Game Preview](https://img.shields.io/badge/built%20with-Excalibur.js-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6) ![Vite](https://img.shields.io/badge/Vite-8.0-646cff)
 
 <div align="center">
-  <img src="docs/neon-runner-gameplay.gif" alt="Neon Runner gameplay" width="800">
+  <img src="docs/neon-runner-gameplay.gif" alt="Gameplay (recorded before the desert reskin)" width="800">
 </div>
 
 ---
 
 ## Gameplay
 
-- **Jump** over incoming obstacles using `Space` or `↑`
+- **Jump** over incoming saguaros using `Space`, `↑`, or a tap/click
 - Speed increases every 3 seconds — survive as long as you can
 - Score accumulates over time; every 100 points triggers an audio cue
-- Hit an obstacle → screen shake, game over, restart with `Space` or `Enter`
+- Hit a cactus → screen shake, game over, restart with `Space`, `Enter`, or a tap
 
 ---
 
@@ -77,10 +77,10 @@ src/
 ├── main.ts                    # Engine init, scene registration
 ├── config.ts                  # All game constants (speeds, colors, physics)
 ├── actors/
-│   ├── Player.ts              # Jump mechanics, ground detection, input cooldown
-│   ├── Obstacle.ts            # Randomly-sized obstacles
+│   ├── Player.ts              # Jump mechanics, leg animation, ground detection, input cooldown
+│   ├── Obstacle.ts            # Randomly-sized pixel saguaros (trunk = hitbox)
 │   ├── Ground.ts              # Static collision platform
-│   └── ParallaxBackground.ts  # 3-layer depth scrolling
+│   └── ParallaxBackground.ts  # 3-layer scrolling mountain ridgelines
 ├── scenes/
 │   ├── GameScene.ts           # Main loop: score, speed scaling, collision
 │   └── GameOverScene.ts       # End screen + restart listener

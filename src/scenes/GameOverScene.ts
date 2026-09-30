@@ -1,6 +1,6 @@
 import { Scene, Engine, Color, vec, Font, Label, Keys, TextAlign } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
-import { CONFIG } from '../config';
+import { CONFIG, PALETTE } from '../config';
 import { GameScene } from './GameScene';
 import { submitHighScore } from '../api/highscore';
 import { showNameInput } from '../ui/NameInputOverlay';
@@ -20,13 +20,12 @@ export class GameOverScene extends Scene {
   onInitialize(_engine: Engine) {
     // GAME OVER title
     const titleLabel = new Label({
-      text: 'GAME OVER',
-      pos: vec(CONFIG.width / 2, CONFIG.height / 2 - 80),
+      text: 'Sunstruck.',
+      pos: vec(CONFIG.width / 2, CONFIG.height / 2 - 122),
       font: new Font({
-        size: 52,
-        bold: true,
+        size: 68,
         color: Color.fromHex(CONFIG.gameOverColor),
-        family: '"Orbitron", monospace',
+        family: CONFIG.displayFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -39,8 +38,8 @@ export class GameOverScene extends Scene {
       pos: vec(CONFIG.width / 2, CONFIG.height / 2 - 42),
       font: new Font({
         size: 12,
-        color: Color.fromHex('#1e1e3e'),
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(PALETTE.ridgeNear),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -52,10 +51,9 @@ export class GameOverScene extends Scene {
       text: 'SCORE  0',
       pos: vec(CONFIG.width / 2, CONFIG.height / 2 - 10),
       font: new Font({
-        size: 28,
-        bold: true,
-        color: Color.White,
-        family: '"Orbitron", monospace',
+        size: 26,
+        color: Color.fromHex(CONFIG.uiColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -68,8 +66,8 @@ export class GameOverScene extends Scene {
       pos: vec(CONFIG.width / 2, CONFIG.height / 2 + 30),
       font: new Font({
         size: 16,
-        color: Color.fromHex('#2a8a7e'),
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(CONFIG.uiMutedColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -83,8 +81,8 @@ export class GameOverScene extends Scene {
       font: new Font({
         size: 13,
         bold: true,
-        color: Color.fromHex('#ffd60a'),
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(CONFIG.globalRecordColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -98,8 +96,8 @@ export class GameOverScene extends Scene {
       pos: vec(CONFIG.width / 2, CONFIG.height / 2 + 75),
       font: new Font({
         size: 12,
-        color: Color.fromHex('#2a8a7e'),
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(CONFIG.uiMutedColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -114,7 +112,7 @@ export class GameOverScene extends Scene {
         size: 16,
         bold: true,
         color: Color.fromHex(CONFIG.globalRecordColor),
-        family: '"Orbitron", monospace',
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -129,8 +127,8 @@ export class GameOverScene extends Scene {
       font: new Font({
         size: 11,
         bold: true,
-        color: Color.White,
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(CONFIG.uiColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -145,7 +143,7 @@ export class GameOverScene extends Scene {
       font: new Font({
         size: 11,
         color: Color.fromHex(CONFIG.globalRecordColor),
-        family: '"Orbitron", monospace',
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -155,12 +153,12 @@ export class GameOverScene extends Scene {
 
     // Restart prompt
     this.promptLabel = new Label({
-      text: 'PRESS  SPACE  TO  RESTART',
+      text: 'PRESS  SPACE  OR  TAP  TO  RUN  AGAIN',
       pos: vec(CONFIG.width / 2, CONFIG.height / 2 + 140),
       font: new Font({
         size: 14,
-        color: Color.fromHex('#00f5d4'),
-        family: '"Orbitron", monospace',
+        color: Color.fromHex(CONFIG.accentColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -238,7 +236,8 @@ export class GameOverScene extends Scene {
 
     if (
       engine.input.keyboard.wasPressed(Keys.Space) ||
-      engine.input.keyboard.wasPressed(Keys.Enter)
+      engine.input.keyboard.wasPressed(Keys.Enter) ||
+      engine.input.pointers.wasDown(0)
     ) {
       engine.goToScene('game');
     }

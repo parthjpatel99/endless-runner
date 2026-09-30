@@ -1,6 +1,6 @@
-import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType } from 'excalibur';
+import { Scene, Engine, Color, vec, Font, Label, TextAlign, Actor, CollisionType, Circle } from 'excalibur';
 import type { SceneActivationContext } from 'excalibur';
-import { CONFIG } from '../config';
+import { CONFIG, PALETTE } from '../config';
 import { Player } from '../actors/Player';
 import { Ground } from '../actors/Ground';
 import { ObstacleSpawner } from '../systems/ObstacleSpawner';
@@ -25,6 +25,7 @@ export class GameScene extends Scene {
   private isGameOver = false;
   private initialized = false;
   private parallaxLayers: ParallaxLayer[] = [];
+  private pebbles: Actor[] = [];
   private shakeTimer = 0;
   private lastScoreMilestone = 0;
   private displayedScore = -1;
@@ -38,32 +39,61 @@ export class GameScene extends Scene {
   }
 
   private setupParallax() {
+    this.setupSky();
     this.parallaxLayers = [];
     CONFIG.parallaxLayers.forEach((layerConfig, index) => {
-      const layer = new ParallaxLayer(
-        this,
-        layerConfig.speedMultiplier,
-        layerConfig.color,
-        layerConfig.count,
-        layerConfig.yBase,
-        layerConfig.minHeight,
-        layerConfig.maxHeight,
-        -10 + index // z-index: further layers behind
-      );
-      this.parallaxLayers.push(layer);
+      // z-index: further layers behind
+      this.parallaxLayers.push(new ParallaxLayer(this, layerConfig, -10 + index));
     });
+  }
+
+  /** Static dusk sky: a haze band and a big banded sun (matches the site's Recess art) */
+  private setupSky() {
+    const decor = (x: number, y: number, width: number, height: number, color: string, z: number) =>
+      this.add(new Actor({ x, y, width, height, color: Color.fromHex(color), collisionType: CollisionType.PreventCollision, z }));
+
+    decor(CONFIG.width / 2, 225, CONFIG.width * 3, 90, PALETTE.skyBand, -30);
+
+    const sun = new Actor({ x: CONFIG.sunX, y: CONFIG.sunY, collisionType: CollisionType.PreventCollision, z: -25 });
+    sun.graphics.use(new Circle({ radius: CONFIG.sunRadius, color: Color.fromHex(CONFIG.sunColor) }));
+    this.add(sun);
+
+    // Horizontal cut-outs across the lower half of the sun
+    decor(CONFIG.sunX, CONFIG.sunY + 2, CONFIG.sunRadius * 2 + 4, 4, PALETTE.skyBand, -24);
+    decor(CONFIG.sunX, CONFIG.sunY + 14, CONFIG.sunRadius * 2 + 4, 5, PALETTE.skyBand, -24);
+    decor(CONFIG.sunX, CONFIG.sunY + 27, CONFIG.sunRadius * 2 + 4, 6, PALETTE.skyBand, -24);
+  }
+
+  /** Little dashes of darker sand that scroll with the ground */
+  private setupPebbles() {
+    this.pebbles = [];
+    for (let i = 0; i < CONFIG.pebbleCount; i++) {
+      const pebble = new Actor({
+        x: Math.random() * CONFIG.width,
+        y: CONFIG.groundY + 10 + Math.random() * (CONFIG.groundHeight - 18),
+        width: 6 + Math.random() * 18,
+        height: 3,
+        color: Color.fromHex(CONFIG.pebbleColor),
+        collisionType: CollisionType.PreventCollision,
+        z: 1,
+      });
+      this.add(pebble);
+      this.pebbles.push(pebble);
+    }
   }
 
   private setupActors() {
     this.ground = new Ground();
     this.add(this.ground);
 
-    // Neon glow line at ground surface
+    this.setupPebbles();
+
+    // Cream highlight along the ground surface
     const groundLine = new Actor({
       x: CONFIG.width / 2,
       y: CONFIG.groundY,
       width: CONFIG.width * 3,
-      height: 2,
+      height: 4,
       color: Color.fromHex(CONFIG.groundLineColor),
       collisionType: CollisionType.PreventCollision,
       z: 2,
@@ -79,12 +109,11 @@ export class GameScene extends Scene {
   private setupUI(_engine: Engine) {
     this.scoreLabel = new Label({
       text: '0',
-      pos: vec(CONFIG.width / 2, 28),
+      pos: vec(CONFIG.width / 2, 32),
       font: new Font({
-        size: 26,
-        bold: true,
+        size: 24,
         color: Color.fromHex(CONFIG.uiColor),
-        family: '"Orbitron", monospace',
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Center,
       }),
       z: 10,
@@ -94,11 +123,11 @@ export class GameScene extends Scene {
     const bestScore = parseInt(localStorage.getItem('neonRunnerBest') || '0', 10);
     this.bestScoreLabel = new Label({
       text: `BEST  ${bestScore}`,
-      pos: vec(CONFIG.width - 16, 28),
+      pos: vec(CONFIG.width - 20, 30),
       font: new Font({
-        size: 14,
-        color: Color.fromHex('#2a8a7e'),
-        family: '"Orbitron", monospace',
+        size: 13,
+        color: Color.fromHex(CONFIG.uiMutedColor),
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Right,
       }),
       z: 10,
@@ -107,11 +136,11 @@ export class GameScene extends Scene {
 
     this.worldRecordLabel = new Label({
       text: 'WORLD RECORD  ---',
-      pos: vec(CONFIG.width - 16, 48),
+      pos: vec(CONFIG.width - 20, 50),
       font: new Font({
-        size: 12,
+        size: 11,
         color: Color.fromHex(CONFIG.globalRecordColor),
-        family: '"Orbitron", monospace',
+        family: CONFIG.monoFamily,
         textAlign: TextAlign.Right,
       }),
       z: 10,
@@ -202,6 +231,13 @@ export class GameScene extends Scene {
     // Update parallax layers
     for (const layer of this.parallaxLayers) {
       layer.update(this.currentSpeed, delta);
+    }
+
+    // Pebbles move at ground speed and wrap
+    const dx = (this.currentSpeed * delta) / 1000;
+    for (const pebble of this.pebbles) {
+      pebble.pos.x -= dx;
+      if (pebble.pos.x < -20) pebble.pos.x = CONFIG.width + Math.random() * 60;
     }
 
     // Update score
